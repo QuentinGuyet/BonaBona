@@ -31,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("BonaBona"),
+        backgroundColor: Colors.green,
       ),
       body: Center(
         child: StreamBuilder<List<Visit>>(
@@ -90,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
+        backgroundColor: Colors.green,
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return BlocProvider<VisitBloc>(

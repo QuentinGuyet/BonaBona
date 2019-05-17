@@ -29,6 +29,7 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Création d\'un séjour'),
+          backgroundColor: Colors.green,
         ),
         resizeToAvoidBottomPadding: false,
         body: Center(

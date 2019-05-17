@@ -20,6 +20,7 @@ class _MealScreenState extends State<MealScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Liste des menus"),
+        backgroundColor: Colors.green,
       ),
       body: StreamBuilder<List<Meal>>(
           stream: bloc.outList,
@@ -65,6 +66,7 @@ class _MealScreenState extends State<MealScreen> {
           }),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
+        backgroundColor: Colors.green,
         onPressed: () {
           bloc.manageMealList.add(AddEmptyMealEvent());
         },

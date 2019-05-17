@@ -49,9 +49,11 @@ class FoodBloc implements BlocBase {
 
   void _handleLogic(FoodEvent event) async {
     if (event is AddFoodEvent) {
+      print("insert food");
       await DBProvider.db.insertFood(event.food);
     } else if (event is UpdateFoodEvent) {
-      await DBProvider.db.deleteFood(_idFood);
+      print("edit");
+      await DBProvider.db.updateFood(event.food);
     } else if (event is SearchFoodInAPI) {
       _barCode = event.barcode;
       Product p = await OpenFoodLogic.ofl.getProduct(event.barcode);
@@ -63,7 +65,6 @@ class FoodBloc implements BlocBase {
   }
 
   void createFoodFromAPI(Product p) {
-    print("create...");
     String name = p.productName;
     String brand = p.brands;
     String imgUrl = p.imgSmallUrl;

@@ -33,6 +33,12 @@ class Food {
         this.quantity,
     });
 
+    String toString() {
+      return "idFood: " + idFood.toString() + "\nidMeal: " + idMeal.toString() + "\nname: " + nameFood 
+      + "\nbrands: " + brandsName + "\nimgUrl: " + imgUrl + "\nprice: " 
+      + price.toString() + "\nquantity: " + quantity.toString(); 
+    }
+
     factory Food.fromJson(Map<String, dynamic> json) => new Food(
         idFood: json["id_food"],
         idMeal: json["id_meal"],

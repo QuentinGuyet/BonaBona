@@ -20,6 +20,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Liste des aliments"),
+        backgroundColor: Colors.green,
       ),
       body: StreamBuilder<List<Food>>(
           stream: bloc.outList,
@@ -67,6 +68,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
           }),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
+        backgroundColor: Colors.green,
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return BlocProvider<FoodBloc>(

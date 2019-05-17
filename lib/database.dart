@@ -28,8 +28,8 @@ class DBProvider {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "base.db");
-    // File f = new File.fromUri(Uri.file(path));
-    // f.delete();
+    File f = new File.fromUri(Uri.file(path));
+    f.delete();
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute(createVisit);
@@ -38,6 +38,7 @@ class DBProvider {
       await db.execute(createFood);
       await db.execute(createTriggerOnDeleteFood);
       await db.execute(createTriggerOnInsertFood);
+      await db.execute(createTriggerOnUpdateFood);
       // await db.execute(sql);
     });
   }
@@ -164,6 +165,13 @@ class DBProvider {
     final db = await database;
     var res = await db.update("Visit", newVisit.toJson(),
         where: "id_visit = ?", whereArgs: [newVisit.idVisit]);
+    return res;
+  }
+
+  updateFood(Food food) async {
+    final db = await database;
+    var res = await db.update("Food", food.toJson(),
+        where: "id_food = ?", whereArgs: [food.idFood]);
     return res;
   }
 

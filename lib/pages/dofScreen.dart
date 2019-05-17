@@ -16,6 +16,7 @@ class DayOfVisitScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Liste des jours'),
+        backgroundColor: Colors.green,
       ),
       body: Center(
           child: StreamBuilder<List<DayOfVisit>>(

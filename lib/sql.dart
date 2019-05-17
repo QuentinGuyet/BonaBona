@@ -32,6 +32,7 @@ final createFood = """CREATE TABLE Food (
   id_meal INTEGER,
   name_food TEXT,
   brands_name TEXT,
+  img_url TEXT,
   price REAL,
   quantity INTEGER,
   PRIMARY KEY(id_food),
@@ -39,16 +40,23 @@ final createFood = """CREATE TABLE Food (
   ON DELETE CASCADE
 );""";
 
-final createTriggerOnInsertFood = """CREATE TRIGGER on_update_food
+final createTriggerOnInsertFood = """CREATE TRIGGER update_meal_on_insert_food
 AFTER INSERT ON Food
 BEGIN
   UPDATE Meal SET total_price = total_price + (new.quantity * new.price) WHERE id_meal = new.id_meal;
 END;""";
 
-final createTriggerOnDeleteFood = """CREATE TRIGGER on_delete_food
+final createTriggerOnDeleteFood = """CREATE TRIGGER update_meal_on_delete_food
 AFTER DELETE ON Food
 BEGIN
   UPDATE Meal SET total_price = total_price - (old.quantity * old.price) WHERE id_meal = old.id_meal;
+END;""";
+
+final createTriggerOnUpdateFood = """CREATE TRIGGER update_meal_on_update_food
+AFTER UPDATE ON Food
+BEGIN
+  UPDATE Meal SET total_price = total_price - (old.quantity * old.price) WHERE id_meal = old.id_meal;
+  UPDATE Meal SET total_price = total_price + (new.quantity * new.price) WHERE id_meal = new.id_meal;
 END;""";
 /*
 

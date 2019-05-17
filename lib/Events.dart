@@ -56,8 +56,8 @@ class AddFoodEvent extends FoodEvent {
 class UpdateMealListEvent extends MealEvent {}
 
 class UpdateFoodEvent extends FoodEvent {
-  int idFood;
-  UpdateFoodEvent(idFood);
+  Food food;
+  UpdateFoodEvent({this.food});
 }
 
 class RemoveFoodEvent extends FoodListEvent {

@@ -7,6 +7,7 @@ final createVisit = """CREATE TABLE Visit (
     PRIMARY KEY(id_visit)
 );""";
 
+
 final createDof = """CREATE TABLE DayOfVisit (
     id_day INTEGER,
     id_visit INTEGER,
@@ -40,6 +41,13 @@ final createFood = """CREATE TABLE Food (
   ON DELETE CASCADE
 );""";
 
+final createLot = """CREATE TABLE Lot(
+  id_food INTEGER,
+  num_lot TEXT,
+  PRIMARY KEY(num_lot, id_food),
+  FOREIGN KEY(id_food) REFERENCES Food(idFood)
+);""";
+
 final createTriggerOnInsertFood = """CREATE TRIGGER update_meal_on_insert_food
 AFTER INSERT ON Food
 BEGIN
@@ -54,10 +62,20 @@ END;""";
 
 final createTriggerOnUpdateFood = """CREATE TRIGGER update_meal_on_update_food
 AFTER UPDATE ON Food
+WHEN old.quantity != new.quantity 
+OR old.price != new.price
 BEGIN
   UPDATE Meal SET total_price = total_price - (old.quantity * old.price) WHERE id_meal = old.id_meal;
   UPDATE Meal SET total_price = total_price + (new.quantity * new.price) WHERE id_meal = new.id_meal;
+  
 END;""";
+
+final createTriggerUpdateLotFoodOnDeleteFood = """CREATE TRIGGER update_lotFood_on_delete_food
+AFTER UPDATE ON Food 
+BEGIN
+  DELETE FROM LotFood WHERE id_food = old.id_food;
+END;""";
+
 /*
 
 CREATE TABLE MEAL (
@@ -80,9 +98,9 @@ CREATE TABLE FOOD (
 )
 
 CREATE TABLE BATCH (
-    id_batch INTEGER,
+    id_lot INTEGER,
     id_food INTEGER,
-    PRIMARY KEY(id_batch)
+    PRIMARY KEY(id_lot)
 )""";
 
 */

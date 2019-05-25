@@ -1,16 +1,20 @@
 import 'models/model.dart';
 import 'models/model_food.dart';
-
-
+import 'models/model_lot.dart';
 
 abstract class VisitListEvent {}
+
 abstract class VisitEvent {
   Visit visit;
   VisitEvent(this.visit);
 }
+
 abstract class DofEvent {}
+
 abstract class MealEvent {}
+
 abstract class FoodEvent {}
+
 abstract class FoodListEvent {}
 
 class RemoveVisitEvent extends VisitListEvent {
@@ -53,11 +57,30 @@ class AddFoodEvent extends FoodEvent {
   AddFoodEvent({this.food});
 }
 
+class AddLotToFoodEvent extends FoodEvent {
+  Food food;
+  Lot lot;
+  AddLotToFoodEvent({this.food, this.lot});
+}
+
+class RemoveLotFromFoodEvent extends FoodEvent {
+  Food food;
+  Lot lot;
+  RemoveLotFromFoodEvent({this.food, this.lot});
+}
+
 class UpdateMealListEvent extends MealEvent {}
 
 class UpdateFoodEvent extends FoodEvent {
   Food food;
   UpdateFoodEvent({this.food});
+}
+
+class UpdateFoodLotEvent extends FoodEvent {
+  Food food;
+  List<Lot> toDelete;
+  List<Lot> toInsert;
+  UpdateFoodLotEvent({this.food, this.toDelete, this.toInsert});
 }
 
 class RemoveFoodEvent extends FoodListEvent {

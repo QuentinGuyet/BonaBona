@@ -4,6 +4,7 @@ import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
 import '../models/model_food.dart';
+import '../models/model_lot.dart';
 import '../database.dart';
 import '../Events.dart';
 
@@ -11,6 +12,7 @@ import '../ext/OpenFoodLogic.dart';
 
 class FoodBloc implements BlocBase {
   Food _food;
+  List<Lot> _listLot;
   int idFood;
   int idMeal;
   int _idFood;
@@ -35,6 +37,7 @@ class FoodBloc implements BlocBase {
     if (idFood != null) {
       _idFood = idFood;
       _getFood();
+      _getLots();
     } else if (idMeal != null){
       _idMeal = idMeal;
     }
@@ -47,13 +50,34 @@ class FoodBloc implements BlocBase {
     _notify();
   }
 
+  void _getLots() async {
+    _listLot = await DBProvider.db.getLots(_idFood);
+    print(_listLot);
+    _food.listLots = _listLot;
+    _notify();
+  }
+
   void _handleLogic(FoodEvent event) async {
     if (event is AddFoodEvent) {
       print("insert food");
       await DBProvider.db.insertFood(event.food);
+      
+      for (Lot lot in event.food.listLots) {
+        print("insert lot ${lot.numLot}");
+        lot.idFood = event.food.idFood;
+        await DBProvider.db.insertLot(lot);
+      }
+      
     } else if (event is UpdateFoodEvent) {
-      print("edit");
+      print("edit food");
       await DBProvider.db.updateFood(event.food);
+    } else if (event is UpdateFoodLotEvent) {
+      for (Lot lot in event.toDelete) {
+        await DBProvider.db.deleteLot(lot);
+      }
+      for (Lot lot in event.toInsert) {
+        await DBProvider.db.insertLot(lot);
+      }
     } else if (event is SearchFoodInAPI) {
       _barCode = event.barcode;
       Product p = await OpenFoodLogic.ofl.getProduct(event.barcode);

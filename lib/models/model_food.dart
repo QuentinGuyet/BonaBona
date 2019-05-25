@@ -3,6 +3,7 @@
 //     final meal = mealFromJson(jsonString);
 
 import 'dart:convert';
+import 'model_lot.dart';
 
 Food mealFromJson(String str) {
     final jsonData = json.decode(str);
@@ -22,6 +23,7 @@ class Food {
     String imgUrl;
     double price;
     int quantity;
+    List<Lot> listLots;
 
     Food({
         this.idFood,
@@ -31,12 +33,13 @@ class Food {
         this.imgUrl,
         this.price,
         this.quantity,
+        this.listLots,
     });
 
     String toString() {
       return "idFood: " + idFood.toString() + "\nidMeal: " + idMeal.toString() + "\nname: " + nameFood 
       + "\nbrands: " + brandsName + "\nimgUrl: " + imgUrl + "\nprice: " 
-      + price.toString() + "\nquantity: " + quantity.toString(); 
+      + price.toString() + "\nquantity: " + quantity.toString() + "\nlots: " + listLots.toString(); 
     }
 
     factory Food.fromJson(Map<String, dynamic> json) => new Food(

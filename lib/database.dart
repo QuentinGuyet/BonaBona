@@ -7,6 +7,7 @@ import 'models/model.dart';
 import 'models/model_dayofvisit.dart';
 import 'models/model_meal.dart';
 import 'models/model_food.dart';
+import 'models/model_lot.dart';
 import 'sql.dart';
 import 'package:intl/intl.dart';
 
@@ -36,10 +37,11 @@ class DBProvider {
       await db.execute(createDof);
       await db.execute(createMeal);
       await db.execute(createFood);
+      await db.execute(createLot);
       await db.execute(createTriggerOnDeleteFood);
       await db.execute(createTriggerOnInsertFood);
       await db.execute(createTriggerOnUpdateFood);
-      // await db.execute(sql);
+      // await db.execute(createTriggerUpdateLotFoodOnDeleteFood);
     });
   }
 
@@ -146,6 +148,20 @@ class DBProvider {
     await db.insert("Food", food.toJson());
   }
 
+  insertLot(Lot lot) async {
+    final db = await database;
+    var raw = await db
+        .rawQuery("SELECT 1 FROM Lot WHERE num_lot = '${lot.numLot}' AND id_food = ${lot.idFood}");
+    if (raw.isNotEmpty)
+      return;
+    await db.insert("Lot", lot.toJson());
+  }
+
+  deleteLot(Lot lot) async {
+    final db = await database;
+    await db.delete("Lot", where: "id_food = ? AND num_lot = ?", whereArgs: [lot.idFood, lot.numLot]);
+  }
+
   deleteVisit(int idVisit) async {
     final db = await database;
     await db.delete("Visit", where: "id_visit = ?", whereArgs: [idVisit]);
@@ -170,8 +186,7 @@ class DBProvider {
 
   updateFood(Food food) async {
     final db = await database;
-    var res = await db.update("Food", food.toJson(),
-        where: "id_food = ?", whereArgs: [food.idFood]);
+    var res = await db.update("Food", food.toJson(), where: "id_food = ?", whereArgs: [food.idFood]);
     return res;
   }
 
@@ -185,6 +200,14 @@ class DBProvider {
     final db = await database;
     var res = await db.query("Food", where: "id_food = ?", whereArgs: [idFood]);
     return res.isNotEmpty ? Food.fromJson(res.first) : null;
+  }
+
+  getLots(int idFood) async {
+    final db = await database;
+    var res = await db.query("Lot", where: "id_food = ?", whereArgs: [idFood]);
+    List<Lot> list =
+        res.isNotEmpty ? res.map((c) => Lot.fromJson(c)).toList() : [];
+    return list;
   }
 
   Future<List<Visit>> getAllVisits() async {

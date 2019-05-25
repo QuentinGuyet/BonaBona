@@ -7,6 +7,7 @@ import 'package:flutter_masked_text/flutter_masked_text.dart';
 
 import '../blocs/FoodBloc.dart';
 import '../models/model_food.dart';
+import '../models/model_lot.dart';
 import '../Events.dart';
 
 class ManageFoodScreen extends StatefulWidget {
@@ -21,13 +22,18 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   final TextEditingController _ctrlBrand = new TextEditingController();
   final TextEditingController _ctrlImgUrl = new TextEditingController();
   final TextEditingController _ctrlQty = new TextEditingController();
+  final TextEditingController _ctrlLot = new TextEditingController();
   final MoneyMaskedTextController _ctrlPrice =
       new MoneyMaskedTextController(decimalSeparator: ",", rightSymbol: "€");
   bool _scannerIsOpen = false;
 
+  List<Lot> _listLots = [];
+  Food food;
+  FoodBloc bloc;
+
   @override
   Widget build(BuildContext context) {
-    final FoodBloc bloc = BlocProvider.of<FoodBloc>(context);
+    bloc = BlocProvider.of<FoodBloc>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,13 +41,13 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         backgroundColor: Colors.green,
       ),
       body: Center(
-        child: _streamBuilderForm(bloc),
+        child: _streamBuilderForm(),
       ),
       resizeToAvoidBottomPadding: true,
     );
   }
 
-  Widget _streamBuilderForm(FoodBloc bloc) {
+  Widget _streamBuilderForm() {
     return StreamBuilder<Food>(
       stream: bloc.outFood,
       builder: (context, snapshot) {
@@ -53,7 +59,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   Form formAddFood(
       FoodBloc bloc, AsyncSnapshot<Food> snapshot, BuildContext context) {
     if (snapshot.hasData) {
-      var food = snapshot.data;
+      food = snapshot.data;
       if (food.nameFood != null && _ctrlName.text.isEmpty)
         _ctrlName.text = food.nameFood;
       if (food.brandsName != null && _ctrlBrand.text.isEmpty)
@@ -65,25 +71,107 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toString();
       }
+      if (_listLots.isEmpty && food.listLots != null) {
+        _listLots = food.listLots;
+      }
     }
 
     return Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              inkWellPaddingImg(snapshot, bloc),
-              paddingName(snapshot, bloc),
-              paddingBrands(),
-              paddingQuantity(),
-              paddingPrice(),
-              paddingButton(snapshot, context, bloc),
-            ],
-          ),
-        ));
+      key: _formKey,
+      child: Container(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  inkWellPaddingImg(),
+                  paddingName(),
+                  paddingBrands(),
+                  paddingQuantity(),
+                  paddingPrice(),
+                  paddingsSavedLotLabel(),
+                ],
+              ),
+            ),
+            SliverList(
+              delegate: _listLots.isNotEmpty
+                  ? SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                      return listLotTile(index, snapshot);
+                    },
+                      childCount:
+                          snapshot.hasData ? snapshot.data.listLots.length : 1)
+                  : SliverChildListDelegate([
+                      ListTile(
+                        title: Center(
+                            child:
+                                Text("Aucun lot enregistré pour cette denrée")),
+                      ),
+                    ]),
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  inputLotName(),
+                  paddingButton(context),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
-  InkWell inkWellPaddingImg(AsyncSnapshot<Food> snapshot, FoodBloc bloc) {
+  Padding paddingsSavedLotLabel() {
+    return Padding(
+      padding: EdgeInsets.only(left: 16.0, top: 24.0, bottom: 14.0),
+      child: Text(
+        "Lots enregistrés :",
+        style: TextStyle(fontSize: 16.0),
+      ),
+    );
+  }
+
+  ListTile listLotTile(int index, AsyncSnapshot<Food> snapshot) {
+    return ListTile(
+      title: Padding(
+        padding: EdgeInsets.only(left: 16.0),
+        child: Text(_listLots[index].numLot.toString()),
+      ),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: () {
+          _listLots.removeWhere((l) => l.numLot == _listLots[index].numLot);
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  ListTile inputLotName() {
+    return ListTile(
+      title: Padding(
+          padding: EdgeInsets.only(left: 16.0),
+          child: TextField(
+            enabled: true,
+            decoration: InputDecoration(hintText: "Saisir num lot"),
+            controller: _ctrlLot,
+          )),
+      trailing: IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            if (_ctrlLot.text.isNotEmpty) {
+              Lot l = new Lot(numLot: _ctrlLot.text);
+              _listLots.add(l);
+              _ctrlLot.clear();
+              setState(() {});
+            }
+          }),
+    );
+  }
+
+  InkWell inkWellPaddingImg() {
     return InkWell(
       child: Padding(
         padding: EdgeInsets.all(12.0),
@@ -91,7 +179,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           child: Container(
             // decoration: BoxDecoration(border: Border.all()),
             constraints: new BoxConstraints.loose(new Size(800, 150)),
-            child: barCodeScanner(snapshot, bloc),
+            child: barCodeScanner(),
           ),
         ),
       ),
@@ -104,10 +192,9 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
-  Padding paddingButton(
-      AsyncSnapshot<Food> snapshot, BuildContext context, FoodBloc bloc) {
+  Padding paddingButton(BuildContext context) {
     String btnText = "Créer";
-    if (snapshot.hasData) {
+    if (food != null) {
       btnText = "Mettre à jour";
     }
     return Padding(
@@ -116,31 +203,91 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           child: Text(btnText),
           onPressed: () {
             FocusScope.of(context).requestFocus(new FocusNode());
-            if (_formKey.currentState.validate() && !snapshot.hasData) {
-              var f = new Food(
-                  idMeal: bloc.idMeal,
-                  nameFood: _ctrlName.text,
-                  brandsName: _ctrlBrand.text,
-                  imgUrl: _ctrlImgUrl.text,
-                  quantity: num.parse(_ctrlQty.text),
-                  price: _ctrlPrice.numberValue);
-              bloc.manageFood.add(new AddFoodEvent(food: f));
+            if (_formKey.currentState.validate() && food == null) {
+              food.idMeal = bloc.idMeal;
+              food.nameFood = _ctrlName.text;
+              food.brandsName = _ctrlBrand.text;
+              food.imgUrl = _ctrlImgUrl.text;
+              food.quantity = num.parse(_ctrlQty.text);
+              food.price = _ctrlPrice.numberValue;
+              food.listLots = _listLots;
+              bloc.manageFood.add(new AddFoodEvent(food: food));
               showSnackBarCreate(context);
-            } else if (_formKey.currentState.validate() && snapshot.hasData) {
-              var f = new Food(
-                  idFood: snapshot.data.idFood,
-                  idMeal: snapshot.data.idMeal,
-                  nameFood: _ctrlName.text,
-                  brandsName: _ctrlBrand.text,
-                  imgUrl: _ctrlImgUrl.text,
-                  quantity: num.parse(_ctrlQty.text),
-                  price: _ctrlPrice.numberValue);
-              bloc.manageFood.add(new UpdateFoodEvent(food: f));
-              showSnackBarEdit(context);
+            } else if (_formKey.currentState.validate() && food != null) {
+              if (updateFood() || updateLotFood()) {
+                showSnackBarEdit(context);
+              } else {
+                showSnackBarNothingToUpdate(context);
+              }
             }
             setState(() {});
           },
         ));
+  }
+
+  bool updateLotFood() {
+    bool _updated = false;
+    List<Lot> _toDelete;
+    List<Lot> _toInsert;
+    if (food.listLots != _listLots) {
+      _updated = true;
+
+
+      for (Lot lot in _listLots) {
+        if (lot.idFood == null) {
+          _toInsert.add(lot);
+          _listLots.remove(lot);
+        }
+      }
+
+      for(Lot oldLot in food.listLots) {
+        bool found = false;
+        for (Lot newLot in _listLots) {
+          if (oldLot.numLot == newLot.numLot) {
+            found = true;
+          }
+        }
+        if(!found) {
+          _toDelete.add(oldLot);
+        }
+      }
+
+    }
+    bloc.manageFood.add(new UpdateFoodLotEvent(food: food, toDelete: _toDelete, toInsert: _toInsert));
+    return _updated;
+  }
+
+  bool updateFood() {
+    bool updated = false;
+    if (food.nameFood != _ctrlName.text) {
+      food.nameFood = _ctrlName.text;
+      updated = true;
+    }
+    if (food.brandsName != _ctrlBrand.text) {
+      food.brandsName = _ctrlBrand.text;
+      updated = true;
+    }
+    if (food.imgUrl != _ctrlImgUrl.text) {
+      food.imgUrl = _ctrlImgUrl.text;
+      updated = true;
+    }
+    if (food.quantity != num.parse(_ctrlQty.text)) {
+      food.quantity = num.parse(_ctrlQty.text);
+      updated = true;
+    }
+    if (food.price != _ctrlPrice.numberValue) {
+      food.price = _ctrlPrice.numberValue;
+      updated = true;
+    }
+
+    bloc.manageFood.add(new UpdateFoodEvent(food: food));
+    return updated;
+  }
+
+  saveLots(Food f) {
+    if (_listLots != f.listLots) {
+      f.listLots = _listLots;
+    }
   }
 
   Padding paddingUrlImg() {
@@ -205,7 +352,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
-  Padding paddingName(AsyncSnapshot<Food> snapshot, FoodBloc bloc) {
+  Padding paddingName() {
     return Padding(
       padding: EdgeInsets.all(12.0),
       child: TextFormField(
@@ -222,15 +369,15 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
-  barCodeScanner(AsyncSnapshot<Food> snapshot, FoodBloc bloc) {
-    if (snapshot.hasData) {
-      if (snapshot.data.imgUrl != null) {
-        if (snapshot.data.imgUrl == "") {
+  barCodeScanner() {
+    if (food != null) {
+      if (food.imgUrl != null) {
+        if (food.imgUrl == "") {
           return Center(
             child: Text("Aucune image disponible"),
           );
         }
-        return new Image(image: NetworkImage(snapshot.data.imgUrl));
+        return new Image(image: NetworkImage(food.imgUrl));
       }
     } else if (!_scannerIsOpen) {
       return Center(
@@ -255,6 +402,13 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       BuildContext context) {
     return Scaffold.of(context).showSnackBar(SnackBar(
       content: Text("Mise à jour effectuée avec succès"),
+    ));
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>
+      showSnackBarNothingToUpdate(BuildContext context) {
+    return Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text("Aucune donnée n'a été mise à jour"),
     ));
   }
 }

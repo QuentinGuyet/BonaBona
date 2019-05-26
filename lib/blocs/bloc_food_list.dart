@@ -43,7 +43,7 @@ class FoodListBloc implements BlocBase {
     _inList.add(_foodList);
   }
 
-  void dispose(){
+  void dispose() {
     _foodListController.close();
     _actionFoodListController.close();
   }

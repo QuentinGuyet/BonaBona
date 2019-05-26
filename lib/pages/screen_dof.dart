@@ -7,7 +7,6 @@ import '../pages/screen_meal.dart';
 import '../blocs/bloc_meal.dart';
 import '../blocs/bloc_dof.dart';
 
-
 class DayOfVisitScreen extends StatefulWidget {
   DayOfVisitScreen({Key key}) : super(key: key);
 
@@ -43,7 +42,8 @@ class _DayOfVisitScreenState extends State<DayOfVisitScreen> {
                             return BlocProvider<MealBloc>(
                                 bloc: MealBloc(dof.idDay), child: MealScreen());
                           })).then((_) {
-                            bloc.manageDovList.add(UpdateDofList(idVisit: dof.idVisit));
+                            bloc.manageDovList
+                                .add(UpdateDofList(idVisit: dof.idVisit));
                             setState(() {});
                           });
                         },

@@ -35,28 +35,27 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     background: Container(color: Colors.red),
                     onDismissed: (direction) {
                       if (direction == DismissDirection.endToStart) {
-                        bloc.manageMealList.add(RemoveFoodEvent(idFood: f.idFood));
+                        bloc.manageMealList
+                            .add(RemoveFoodEvent(idFood: f.idFood));
                       }
                     },
                     child: ListTile(
-                      leading: Icon(Icons.restaurant_menu),
-                      title: Text("${f.nameFood}"),
-                      subtitle: Text(
-                          "Prix : ${f.price.toStringAsFixed(2)} € - Quantité : ${f.quantity}"),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
-                          return BlocProvider<FoodBloc>(
-                            bloc: FoodBloc(idFood: f.idFood), 
-                            child: ManageFoodScreen()
-                          );
-                        }))
-                        .then( (_) {
-                          setState(() {
-                            bloc.manageMealList.add(UpdateFoodListEvent());
+                        leading: Icon(Icons.restaurant_menu),
+                        title: Text("${f.nameFood}"),
+                        subtitle: Text(
+                            "Prix : ${f.price.toStringAsFixed(2)} € - Quantité : ${f.quantity}"),
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return BlocProvider<FoodBloc>(
+                                bloc: FoodBloc(idFood: f.idFood),
+                                child: ManageFoodScreen());
+                          })).then((_) {
+                            setState(() {
+                              bloc.manageMealList.add(UpdateFoodListEvent());
+                            });
                           });
-                        });
-                      }
-                    ),
+                        }),
                   );
                 },
               );
@@ -75,7 +74,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 bloc: FoodBloc(idMeal: bloc.idMeal), child: ManageFoodScreen());
           })).then((_) {
             setState(() {
-             bloc.manageMealList.add(UpdateFoodListEvent()); 
+              bloc.manageMealList.add(UpdateFoodListEvent());
             });
           });
         },

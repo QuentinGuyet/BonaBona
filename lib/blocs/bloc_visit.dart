@@ -18,13 +18,11 @@ class VisitBloc implements BlocBase {
   StreamSink get manageVisit => _actionVisitController.sink;
 
   VisitBloc({this.visit}) {
-    // print("Construct of VisitBloc...");
     _actionVisitController.stream.listen(_handleVisitLogic);
     _notifyVisit();
   }
 
   void _handleVisitLogic(VisitEvent event) async {
-    // print("HandleVisitLogic : $event");
     visit = event.visit;
     if (event is UpdateVisitEvent) {
       await DBProvider.db.updateVisit(visit);

@@ -25,6 +25,7 @@ class DBProvider {
     _database = await initDB();
     return _database;
   }
+
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "base.db");
@@ -152,16 +153,17 @@ class DBProvider {
 
   insertLot(Lot lot) async {
     final db = await database;
-    var raw = await db
-        .rawQuery("SELECT 1 FROM Lot WHERE num_lot = '${lot.numLot}' AND id_food = ${lot.idFood}");
-    if (raw.isNotEmpty)
-      return;
+    var raw = await db.rawQuery(
+        "SELECT 1 FROM Lot WHERE num_lot = '${lot.numLot}' AND id_food = ${lot.idFood}");
+    if (raw.isNotEmpty) return;
     await db.insert("Lot", lot.toJson());
   }
 
   deleteLot(Lot lot) async {
     final db = await database;
-    await db.delete("Lot", where: "id_food = ? AND num_lot = ?", whereArgs: [lot.idFood, lot.numLot]);
+    await db.delete("Lot",
+        where: "id_food = ? AND num_lot = ?",
+        whereArgs: [lot.idFood, lot.numLot]);
   }
 
   deleteVisit(int idVisit) async {
@@ -188,13 +190,15 @@ class DBProvider {
 
   updateFood(Food food) async {
     final db = await database;
-    var res = await db.update("Food", food.toJson(), where: "id_food = ?", whereArgs: [food.idFood]);
+    var res = await db.update("Food", food.toJson(),
+        where: "id_food = ?", whereArgs: [food.idFood]);
     return res;
   }
 
   getVisit(int idVisit) async {
     final db = await database;
-    var res = await db.query("Visit", where: "id_visit = ?", whereArgs: [idVisit]);
+    var res =
+        await db.query("Visit", where: "id_visit = ?", whereArgs: [idVisit]);
     return res.isNotEmpty ? Visit.fromJson(res.first) : null;
   }
 
@@ -222,7 +226,8 @@ class DBProvider {
 
   Future<List<Visit>> getAllDovs() async {
     final db = await database;
-    var res = await db.rawQuery("""SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(total_price) AS total_price 
+    var res = await db.rawQuery(
+        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(total_price) AS total_price 
                                     FROM DayOfVisit d, Meal m 
                                     WHERE d.id_day = m.id_day;""");
     List<Visit> list =
@@ -250,7 +255,8 @@ class DBProvider {
   Future<List<DayOfVisit>> getAllDaysOfVisit(int idVisit) async {
     final db = await database;
 
-     var res = await db.rawQuery("""SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(m.total_price) AS total_price 
+    var res = await db.rawQuery(
+        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(m.total_price) AS total_price 
                                     FROM DayOfVisit AS d, Meal AS m 
                                     WHERE d.id_day = m.id_day
                                     AND d.id_visit = $idVisit

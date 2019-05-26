@@ -16,7 +16,6 @@ class DofVisitBloc implements BlocBase {
 
   final _actionDovListController = BehaviorSubject<DofEvent>();
 
-
   StreamSink get manageDovList => _actionDovListController.sink;
 
   DofVisitBloc(int idVisit) {

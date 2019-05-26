@@ -7,7 +7,6 @@ final createVisit = """CREATE TABLE IF NOT EXISTS Visit (
     PRIMARY KEY(id_visit)
 );""";
 
-
 final createDof = """CREATE TABLE IF NOT EXISTS DayOfVisit (
     id_day INTEGER,
     id_visit INTEGER,

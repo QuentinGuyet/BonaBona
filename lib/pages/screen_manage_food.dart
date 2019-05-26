@@ -228,7 +228,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     if (food.listLots != _lotsList) {
       _updated = true;
       bloc.manageFood.add(new UpdateFoodLotEvent(
-        idFood: food.idFood, oldList: food.listLots, newList: _lotsList));
+          idFood: food.idFood, oldList: food.listLots, newList: _lotsList));
     }
     return _updated;
   }

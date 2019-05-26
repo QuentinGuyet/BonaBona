@@ -15,7 +15,6 @@ class VisitListBloc implements BlocBase {
   StreamSink<List<Visit>> get _inList => _visitListController.sink;
   Stream<List<Visit>> get outList => _visitListController.stream;
 
-  
   StreamSink get manageVisitList => _actionVisitListController.sink;
 
   VisitListBloc() {
@@ -32,7 +31,6 @@ class VisitListBloc implements BlocBase {
     if (event is UpdateVisitListEvent) {}
 
     _getVisitList();
-   
   }
 
   void _getVisitList() async {

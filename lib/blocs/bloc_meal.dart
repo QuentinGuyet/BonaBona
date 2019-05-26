@@ -42,7 +42,7 @@ class MealBloc implements BlocBase {
     _inList.add(_mealList);
   }
 
-  void dispose(){
+  void dispose() {
     _mealListController.close();
     _actionMealListController.close();
   }

@@ -3,11 +3,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path/path.dart';
-import 'models/model.dart';
-import 'models/model_dayofvisit.dart';
-import 'models/model_meal.dart';
-import 'models/model_food.dart';
-import 'models/model_lot.dart';
+import '../models/model_visit.dart';
+import '../models/model_dayofvisit.dart';
+import '../models/model_meal.dart';
+import '../models/model_food.dart';
+import '../models/model_lot.dart';
 import 'sql.dart';
 import 'package:intl/intl.dart';
 

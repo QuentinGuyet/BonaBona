@@ -1,6 +1,6 @@
-import 'models/model.dart';
-import 'models/model_food.dart';
-import 'models/model_lot.dart';
+import '../models/model_visit.dart';
+import '../models/model_food.dart';
+import '../models/model_lot.dart';
 
 abstract class VisitListEvent {}
 
@@ -77,10 +77,10 @@ class UpdateFoodEvent extends FoodEvent {
 }
 
 class UpdateFoodLotEvent extends FoodEvent {
-  Food food;
-  List<Lot> toDelete;
-  List<Lot> toInsert;
-  UpdateFoodLotEvent({this.food, this.toDelete, this.toInsert});
+  int idFood;
+  List<Lot> newList;
+  List<Lot> oldList;
+  UpdateFoodLotEvent({this.idFood, this.newList, this.oldList});
 }
 
 class RemoveFoodEvent extends FoodListEvent {

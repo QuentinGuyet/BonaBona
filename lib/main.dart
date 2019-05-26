@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import 'models/model.dart';
+import 'models/model_visit.dart';
 
-import 'blocs/DofBloc.dart';
-import 'blocs/VisitBloc.dart';
-import 'blocs/VisitListBloc.dart';
+import 'blocs/bloc_dof.dart';
+import 'blocs/bloc_visit.dart';
+import 'blocs/bloc_visit_list.dart';
 
-import 'Events.dart';
+import 'blocs/events.dart';
 
-import 'pages/dofScreen.dart';
-import 'pages/manageVisitScreen.dart';
+import 'pages/screen_dof.dart';
+import 'pages/screen_manage_visit.dart';
 
 void main() => runApp(MaterialApp(
         home: BlocProvider<VisitListBloc>(

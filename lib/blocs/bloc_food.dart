@@ -5,8 +5,8 @@ import 'package:openfoodfacts/openfoodfacts.dart';
 
 import '../models/model_food.dart';
 import '../models/model_lot.dart';
-import '../database.dart';
-import '../Events.dart';
+import '../database/database.dart';
+import 'events.dart';
 
 import '../ext/OpenFoodLogic.dart';
 
@@ -30,7 +30,6 @@ class FoodBloc implements BlocBase {
 
   String get barCode => _barCode;
 
-
   FoodBloc({this.idFood, this.idMeal}) {
     _actionFoodController.stream.listen(_handleLogic);
 
@@ -38,7 +37,7 @@ class FoodBloc implements BlocBase {
       _idFood = idFood;
       _getFood();
       _getLots();
-    } else if (idMeal != null){
+    } else if (idMeal != null) {
       _idMeal = idMeal;
     }
 
@@ -61,23 +60,17 @@ class FoodBloc implements BlocBase {
     if (event is AddFoodEvent) {
       print("insert food");
       await DBProvider.db.insertFood(event.food);
-      
+
       for (Lot lot in event.food.listLots) {
         print("insert lot ${lot.numLot}");
         lot.idFood = event.food.idFood;
         await DBProvider.db.insertLot(lot);
       }
-      
     } else if (event is UpdateFoodEvent) {
       print("edit food");
       await DBProvider.db.updateFood(event.food);
     } else if (event is UpdateFoodLotEvent) {
-      for (Lot lot in event.toDelete) {
-        await DBProvider.db.deleteLot(lot);
-      }
-      for (Lot lot in event.toInsert) {
-        await DBProvider.db.insertLot(lot);
-      }
+      updateLotFood(event.idFood, event.oldList, event.newList);
     } else if (event is SearchFoodInAPI) {
       _barCode = event.barcode;
       Product p = await OpenFoodLogic.ofl.getProduct(event.barcode);
@@ -85,7 +78,34 @@ class FoodBloc implements BlocBase {
         createFoodFromAPI(p);
       }
     }
-     _notify();
+    _notify();
+  }
+
+  /*  On sait quels Lots insérer car ils n'ont pas d'idFood et ceux à supprimer 
+      en comparant un à un les éléments présents dans l'ancienne list avec ceux
+      présent dans la nouvelle. 
+      Si le lot n'apparait pas dans la nouvelle, c'est
+      qu'il a été supprimé : on le retire donc de la BDD 
+  */
+  void updateLotFood(int idFood, List<Lot> oldList, List<Lot> newList) async {
+    for (Lot lot in newList) {
+      if (lot.idFood == null) {
+        lot.idFood = idFood;
+        await DBProvider.db.insertLot(lot);
+      }
+    }
+
+    for (Lot oldLot in oldList) {
+      bool found = false;
+      for (Lot newLot in newList) {
+        if (oldLot.numLot == newLot.numLot) {
+          found = true;
+        }
+      }
+      if (!found) {
+        await DBProvider.db.deleteLot(oldLot);
+      }
+    }
   }
 
   void createFoodFromAPI(Product p) {
@@ -101,7 +121,7 @@ class FoodBloc implements BlocBase {
     _inFood.add(_food);
   }
 
-  void dispose(){
+  void dispose() {
     _foodController.close();
     _actionFoodController.close();
   }

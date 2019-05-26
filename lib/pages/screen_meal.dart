@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../blocs/FoodListBloc.dart';
-import '../blocs/MealBloc.dart';
+import '../blocs/bloc_food_list.dart';
+import '../blocs/bloc_meal.dart';
 import '../models/model_meal.dart';
-import '../pages/foodScreen.dart';
-import '../Events.dart';
+import '../pages/screen_food_list.dart';
+import '../blocs/events.dart';
 
 class MealScreen extends StatefulWidget {
   MealScreen({Key key}) : super(key: key);

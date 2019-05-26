@@ -1,10 +1,7 @@
-import 'dart:async';
-import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import 'VisitBloc.dart';
-import 'VisitListBloc.dart';
-
+import 'bloc_visit.dart';
+import 'bloc_visit_list.dart';
 
 class AppVisitBloc extends BlocBase {
   VisitBloc _visitBloc;
@@ -13,8 +10,6 @@ class AppVisitBloc extends BlocBase {
   AppVisitBloc() {
     _visitBloc = VisitBloc();
     _visitListBloc = VisitListBloc();
-
-    // _visitListBloc.outList.listen(_visitListBloc.inList.add);
   }
 
   VisitBloc get visitBloc => _visitBloc;
@@ -25,5 +20,4 @@ class AppVisitBloc extends BlocBase {
     _visitBloc.dispose();
     _visitListBloc.dispose();
   }
-  
 }

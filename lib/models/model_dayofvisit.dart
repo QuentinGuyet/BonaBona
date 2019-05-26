@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final dayOfVisit = dayOfVisitFromJson(jsonString);
-
 import 'dart:convert';
 
 DayOfVisit dayOfVisitFromJson(String str) {

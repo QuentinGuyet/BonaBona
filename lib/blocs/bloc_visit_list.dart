@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../models/model.dart';
-import '../database.dart';
-import '../Events.dart';
+import '../models/model_visit.dart';
+import '../database/database.dart';
+import 'events.dart';
 
 class VisitListBloc implements BlocBase {
   List<Visit> _visitList;

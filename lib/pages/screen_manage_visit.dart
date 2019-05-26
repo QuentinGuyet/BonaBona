@@ -2,10 +2,9 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../blocs/VisitListBloc.dart';
-import '../blocs/VisitBloc.dart';
-import '../models/model.dart';
-import '../Events.dart';
+import '../blocs/bloc_visit.dart';
+import '../models/model_visit.dart';
+import '../blocs/events.dart';
 
 class ManageVisitScreen extends StatefulWidget {
   ManageVisitScreen({Key key}) : super(key: key);
@@ -22,9 +21,12 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
 
   final TextStyle _biggerFont = const TextStyle(fontSize: 18.0);
 
+  Visit visit;
+  VisitBloc bloc;
+
   @override
   Widget build(BuildContext context) {
-    final VisitBloc bloc = BlocProvider.of<VisitBloc>(context);
+    bloc = BlocProvider.of<VisitBloc>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -33,31 +35,34 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
         ),
         resizeToAvoidBottomPadding: false,
         body: Center(
-          child: _streamBuilderForm(bloc),
+          child: _streamBuilderForm(),
         ));
   }
 
-  Widget _streamBuilderForm(VisitBloc bloc) {
+  Widget _streamBuilderForm() {
     return StreamBuilder<Visit>(
         stream: bloc.outVisit,
         builder: (BuildContext context, AsyncSnapshot<Visit> snapshot) {
+          if (snapshot.hasData) {
+            visit = snapshot.data;
+          }
           return Form(
             key: _formKey,
             child: Column(
               children: <Widget>[
-                _paddingTextFormFieldName(snapshot),
-                _paddingTextFromFieldStartDate(snapshot),
-                _paddingTextFromFieldEndDate(snapshot),
-                _paddingRaisedButtonValidForm(context, snapshot, bloc),
+                _paddingTextFormFieldName(),
+                _paddingTextFromFieldStartDate(),
+                _paddingTextFromFieldEndDate(),
+                _paddingRaisedButtonValidForm(context),
               ],
             ),
           );
         });
   }
 
-  Widget _paddingTextFormFieldName(AsyncSnapshot<Visit> snapshot) {
-    if (snapshot.hasData && _nameCtrlr.text.isEmpty) {
-      _nameCtrlr.text = snapshot.data.nameVisit;
+  Widget _paddingTextFormFieldName() {
+    if (visit != null && _nameCtrlr.text.isEmpty) {
+      _nameCtrlr.text = visit.nameVisit;
     }
     return Padding(
       padding: EdgeInsets.all(16.0),
@@ -74,12 +79,12 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     );
   }
 
-  Widget _paddingTextFromFieldStartDate(AsyncSnapshot<Visit> snapshot) {
+  Widget _paddingTextFromFieldStartDate() {
     bool enabled = true;
     Color color = Colors.black;
 
-    if (snapshot.hasData) {
-      _sDateCtrlr.text = snapshot.data.startDate;
+    if (visit != null) {
+      _sDateCtrlr.text = visit.startDate;
       enabled = false;
       color = Colors.grey;
     }
@@ -106,12 +111,12 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     );
   }
 
-  Widget _paddingTextFromFieldEndDate(AsyncSnapshot<Visit> snapshot) {
+  Widget _paddingTextFromFieldEndDate() {
     bool enabled = true;
     Color color = Colors.black;
 
-    if (snapshot.hasData) {
-      _eDateCtrlr.text = snapshot.data.endDate;
+    if (visit != null) {
+      _eDateCtrlr.text = visit.endDate;
       enabled = false;
       color = Colors.grey;
     }
@@ -142,10 +147,9 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     );
   }
 
-  Widget _paddingRaisedButtonValidForm(
-      BuildContext context, AsyncSnapshot<Visit> snapshot, VisitBloc bloc) {
+  Widget _paddingRaisedButtonValidForm(BuildContext context) {
     String text = "Créer";
-    if (snapshot.hasData) {
+    if (visit != null) {
       text = "Mettre à jour";
     }
     return Padding(
@@ -154,18 +158,23 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
         child: Text(text),
         onPressed: () {
           FocusScope.of(context).requestFocus(new FocusNode());
-          if (_formKey.currentState.validate() && !snapshot.hasData) {
-            var v = new Visit(
-              nameVisit: _nameCtrlr.text,
-              startDate: _sDateCtrlr.text,
-              endDate: _eDateCtrlr.text);
-            bloc.manageVisit.add(AddVisitEvent(v));
+          if (_formKey.currentState.validate() && visit == null) {
+            visit = new Visit(
+                nameVisit: _nameCtrlr.text,
+                startDate: _sDateCtrlr.text,
+                endDate: _eDateCtrlr.text);
+            bloc.manageVisit.add(AddVisitEvent(visit));
             showSnackBarCreate(context);
-          } else if (_formKey.currentState.validate()) {
-            var v = snapshot.data;
-            v.nameVisit = _nameCtrlr.text;
-            bloc.manageVisit.add(new UpdateVisitEvent(v));
-            showSnackBarEdit(context);
+          } else if (_formKey.currentState.validate() && visit != null) {
+            
+            if (visit.nameVisit != _nameCtrlr.text) {
+              visit.nameVisit = _nameCtrlr.text;
+              bloc.manageVisit.add(new UpdateVisitEvent(visit));
+              showSnackBarEdit(context);
+            } else {
+              showSnackBarNothingToUpdate(context);
+            }
+            
           }
           setState(() {
             _nameCtrlr.clear();
@@ -189,6 +198,13 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     return Scaffold.of(context).showSnackBar(SnackBar(
       content:
           Text("Le séjour ${_nameCtrlr.text} a été correctement mis à jour."),
+    ));
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>
+      showSnackBarNothingToUpdate(BuildContext context) {
+    return Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text("Aucune donnée n'a été mise à jour"),
     ));
   }
 

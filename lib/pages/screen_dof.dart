@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
 import '../models/model_dayofvisit.dart';
-import '../pages/mealScreen.dart';
-import '../blocs/MealBloc.dart';
-import '../blocs/DofBloc.dart';
-import '../Events.dart';
+import '../pages/screen_meal.dart';
+import '../blocs/bloc_meal.dart';
+import '../blocs/bloc_dof.dart';
 
 class DayOfVisitScreen extends StatelessWidget {
   DayOfVisitScreen({Key key}) : super(key: key);

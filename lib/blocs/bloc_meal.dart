@@ -3,8 +3,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
 import '../models/model_meal.dart';
-import '../database.dart';
-import '../Events.dart';
+import '../database/database.dart';
+import 'events.dart';
 
 class MealBloc implements BlocBase {
   List<Meal> _mealList = [];

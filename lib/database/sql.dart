@@ -46,6 +46,7 @@ final createLot = """CREATE TABLE Lot(
   num_lot TEXT,
   PRIMARY KEY(num_lot, id_food),
   FOREIGN KEY(id_food) REFERENCES Food(idFood)
+  ON DELETE CASCADE
 );""";
 
 final createTriggerOnInsertFood = """CREATE TRIGGER update_meal_on_insert_food
@@ -69,38 +70,3 @@ BEGIN
   UPDATE Meal SET total_price = total_price + (new.quantity * new.price) WHERE id_meal = new.id_meal;
   
 END;""";
-
-final createTriggerUpdateLotFoodOnDeleteFood = """CREATE TRIGGER update_lotFood_on_delete_food
-AFTER UPDATE ON Food 
-BEGIN
-  DELETE FROM LotFood WHERE id_food = old.id_food;
-END;""";
-
-/*
-
-CREATE TABLE MEAL (
-    id_meal INTEGER,
-    id_day INTEGER,
-    name_meal TEXT NOT NULL,
-    total_price REAL,
-    PRIMARY KEY(id_meal),
-    FOREIGN KEY(id_day) REFERENCES DAYOFVISIT(id_day)
-)
-
-CREATE TABLE FOOD (
-    id_food INTEGER,
-    id_meal INTEGER,
-    name_food TEXT NOT NULL,
-    price REAL NOT NULL,
-    quantity INTEGER NOT NULL,
-    PRIMARY KEY(id_food),
-    FOREIGN KEY(id_meal) REFERENCES MEAL(id_meal)
-)
-
-CREATE TABLE BATCH (
-    id_lot INTEGER,
-    id_food INTEGER,
-    PRIMARY KEY(id_lot)
-)""";
-
-*/

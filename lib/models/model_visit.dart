@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final visit = visitFromJson(jsonString);
-
 import 'dart:convert';
 
 Visit visitFromJson(String str) {
@@ -47,7 +43,6 @@ class Visit {
 
     @override
   String toString() {
-    // TODO: implement toString
     return "id: $idVisit, name: $nameVisit, startDate: $startDate, endDate: $endDate, nbDays: $nbDays";
   }
 }

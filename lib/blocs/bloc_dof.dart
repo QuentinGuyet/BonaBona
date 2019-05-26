@@ -3,7 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
 import '../models/model_dayofvisit.dart';
-import '../database.dart';
+import '../database/database.dart';
 
 class DofVisitBloc implements BlocBase {
   List<DayOfVisit> _dofList = [];

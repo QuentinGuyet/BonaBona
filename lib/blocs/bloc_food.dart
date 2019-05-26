@@ -51,23 +51,18 @@ class FoodBloc implements BlocBase {
 
   void _getLots() async {
     _listLot = await DBProvider.db.getLots(_idFood);
-    print(_listLot);
     _food.listLots = _listLot;
     _notify();
   }
 
   void _handleLogic(FoodEvent event) async {
     if (event is AddFoodEvent) {
-      print("insert food");
       await DBProvider.db.insertFood(event.food);
-
       for (Lot lot in event.food.listLots) {
-        print("insert lot ${lot.numLot}");
         lot.idFood = event.food.idFood;
         await DBProvider.db.insertLot(lot);
       }
     } else if (event is UpdateFoodEvent) {
-      print("edit food");
       await DBProvider.db.updateFood(event.food);
     } else if (event is UpdateFoodLotEvent) {
       updateLotFood(event.idFood, event.oldList, event.newList);

@@ -1,4 +1,4 @@
-final createVisit = """CREATE TABLE Visit (
+final createVisit = """CREATE TABLE IF NOT EXISTS Visit (
     id_visit INTEGER IDENTITY,
     name_visit TEXT NOT NULL,
     start_date TEXT NOT NULL,
@@ -8,17 +8,17 @@ final createVisit = """CREATE TABLE Visit (
 );""";
 
 
-final createDof = """CREATE TABLE DayOfVisit (
+final createDof = """CREATE TABLE IF NOT EXISTS DayOfVisit (
     id_day INTEGER,
     id_visit INTEGER,
     date_day TEXT,
     num_day INTEGER,
     PRIMARY KEY(id_day),
-    FOREIGN KEY(id_visit) REFERENCES VISIT(id_visit)
+    FOREIGN KEY(id_visit) REFERENCES Visit(id_visit)
     ON DELETE CASCADE
 );""";
 
-final createMeal = """CREATE TABLE Meal (
+final createMeal = """CREATE TABLE IF NOT EXISTS Meal (
   id_meal INTEGER,
   id_day INTEGER,
   name_meal TEXT,
@@ -28,7 +28,7 @@ final createMeal = """CREATE TABLE Meal (
   ON DELETE CASCADE
 );""";
 
-final createFood = """CREATE TABLE Food (
+final createFood = """CREATE TABLE IF NOT EXISTS Food (
   id_food INTEGER,
   id_meal INTEGER,
   name_food TEXT,
@@ -41,11 +41,11 @@ final createFood = """CREATE TABLE Food (
   ON DELETE CASCADE
 );""";
 
-final createLot = """CREATE TABLE Lot(
+final createLot = """CREATE TABLE IF NOT EXISTS Lot(
   id_food INTEGER,
   num_lot TEXT,
   PRIMARY KEY(num_lot, id_food),
-  FOREIGN KEY(id_food) REFERENCES Food(idFood)
+  FOREIGN KEY(id_food) REFERENCES Food(id_food)
   ON DELETE CASCADE
 );""";
 

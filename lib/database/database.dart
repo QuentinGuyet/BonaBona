@@ -25,12 +25,11 @@ class DBProvider {
     _database = await initDB();
     return _database;
   }
-
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "base.db");
-    File f = new File.fromUri(Uri.file(path));
-    f.delete();
+    // File f = new File.fromUri(Uri.file(path));
+    // f.delete();
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute(createVisit);
@@ -41,8 +40,11 @@ class DBProvider {
       await db.execute(createTriggerOnDeleteFood);
       await db.execute(createTriggerOnInsertFood);
       await db.execute(createTriggerOnUpdateFood);
-      // await db.execute(createTriggerUpdateLotFoodOnDeleteFood);
-    });
+    }, onConfigure: _onConfigure);
+  }
+
+  _onConfigure(Database db) async {
+    await db.execute("PRAGMA foreign_keys = ON");
   }
 
   insertVisit(Visit newVisit) async {
@@ -220,9 +222,12 @@ class DBProvider {
 
   Future<List<Visit>> getAllDovs() async {
     final db = await database;
-    var res = await db.query("DayOfVisit");
+    var res = await db.rawQuery("""SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(total_price) AS total_price 
+                                    FROM DayOfVisit d, Meal m 
+                                    WHERE d.id_day = m.id_day;""");
     List<Visit> list =
         res.isNotEmpty ? res.map((c) => Visit.fromJson(c)).toList() : [];
+    print(list);
     return list;
   }
 
@@ -244,8 +249,12 @@ class DBProvider {
 
   Future<List<DayOfVisit>> getAllDaysOfVisit(int idVisit) async {
     final db = await database;
-    var res = await db
-        .query("DayOfVisit", where: "id_visit = ?", whereArgs: [idVisit]);
+
+     var res = await db.rawQuery("""SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(m.total_price) AS total_price 
+                                    FROM DayOfVisit AS d, Meal AS m 
+                                    WHERE d.id_day = m.id_day
+                                    AND d.id_visit = $idVisit
+                                    GROUP BY d.id_day;""");
     List<DayOfVisit> list =
         res.isNotEmpty ? res.map((c) => DayOfVisit.fromJson(c)).toList() : [];
     return list;

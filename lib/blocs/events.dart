@@ -40,9 +40,9 @@ class DisplayVisitEvent extends VisitEvent {
   DisplayVisitEvent(Visit visit) : super(visit);
 }
 
-class DisplayDofEvent extends DofEvent {
+class UpdateDofList extends DofEvent {
   int idVisit;
-  DisplayDofEvent({this.idVisit});
+  UpdateDofList({this.idVisit});
 }
 
 class RemoveMealEvent extends MealEvent {

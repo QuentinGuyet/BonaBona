@@ -27,7 +27,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final VisitListBloc bloc = BlocProvider.of<VisitListBloc>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text("BonaBona"),

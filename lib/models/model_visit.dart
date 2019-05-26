@@ -43,6 +43,6 @@ class Visit {
 
     @override
   String toString() {
-    return "id: $idVisit, name: $nameVisit, startDate: $startDate, endDate: $endDate, nbDays: $nbDays";
+    return "$idVisit - $nameVisit - $startDate - $endDate - $nbDays\n";
   }
 }

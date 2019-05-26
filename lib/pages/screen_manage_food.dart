@@ -68,7 +68,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.quantity != null && _ctrlQty.text.isEmpty)
         _ctrlQty.text = food.quantity.toString();
       if (food.price != null && _ctrlPrice.text == "0,00€") {
-        _ctrlPrice.text = food.price.toString();
+        _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
       if (_lotsList.isEmpty && food.listLots != null) {
         _lotsList.addAll(food.listLots);
@@ -289,9 +289,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       padding: EdgeInsets.all(12.0),
       child: TextFormField(
         autofocus: false,
-        validator: (value) {
-          print(value);
-        },
         decoration: InputDecoration(
             labelText: "Prix unitaire", suffixIcon: Icon(Icons.euro_symbol)),
         keyboardType: TextInputType.number,

@@ -19,5 +19,7 @@ class OpenFoodLogic {
     if (result.status == 1) {
       return result.product;
     }
+
+    return null;
   }
 }

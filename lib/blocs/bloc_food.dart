@@ -16,7 +16,6 @@ class FoodBloc implements BlocBase {
   int idFood;
   int idMeal;
   int _idFood;
-  int _idMeal;
 
   String _barCode = "";
 
@@ -37,8 +36,6 @@ class FoodBloc implements BlocBase {
       _idFood = idFood;
       _getFood();
       _getLots();
-    } else if (idMeal != null) {
-      _idMeal = idMeal;
     }
 
     _notify();

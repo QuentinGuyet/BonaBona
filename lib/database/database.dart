@@ -29,8 +29,8 @@ class DBProvider {
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "base.db");
-    // File f = new File.fromUri(Uri.file(path));
-    // f.delete();
+    File f = new File.fromUri(Uri.file(path));
+    f.delete();
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute(createVisit);
@@ -227,7 +227,7 @@ class DBProvider {
   Future<List<Visit>> getAllDovs() async {
     final db = await database;
     var res = await db.rawQuery(
-        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(total_price) AS total_price 
+        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, IFNULL(SUM(m.total_price), 0.0) AS total_price 
                                     FROM DayOfVisit d, Meal m 
                                     WHERE d.id_day = m.id_day;""");
     List<Visit> list =
@@ -255,14 +255,19 @@ class DBProvider {
   Future<List<DayOfVisit>> getAllDaysOfVisit(int idVisit) async {
     final db = await database;
 
+    var r = await db.rawQuery("SELECT id_day, SUM(total_price) AS total_price FROM Meal GROUP BY id_day");
+
     var res = await db.rawQuery(
-        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, SUM(m.total_price) AS total_price 
-                                    FROM DayOfVisit AS d, Meal AS m 
-                                    WHERE d.id_day = m.id_day
-                                    AND d.id_visit = $idVisit
-                                    GROUP BY d.id_day;""");
+        """SELECT d.id_visit, d.id_day, d.date_day, d.num_day, IFNULL(SUM(m.total_price), 0.0) AS total_price
+            FROM DayOfVisit AS d
+            LEFT JOIN Meal AS m ON d.id_day = m.id_day
+            WHERE d.id_visit = $idVisit
+            GROUP BY d.id_day;""");
+
+
     List<DayOfVisit> list =
         res.isNotEmpty ? res.map((c) => DayOfVisit.fromJson(c)).toList() : [];
+    list.forEach((f) => print("${f.idDay} - ${f.totalPrice}"));
     return list;
   }
 

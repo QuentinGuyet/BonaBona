@@ -1,5 +1,5 @@
-name: testdb
-description: A new Flutter project.
+name: BonaBona
+description: A wonderfull food management tool.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -28,6 +28,7 @@ dependencies:
   bloc_pattern: ^1.5.2
   image_picker: ^0.5.3
   openfoodfacts: ^0.0.10
+  flutter_slidable: ^0.4.8
   qr_mobile_vision: "^0.2.2"
   intl_translation: ^0.17.3
   flutter_masked_text: ^0.8.0

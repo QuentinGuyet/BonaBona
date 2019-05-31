@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
-import 'package:testdb/blocs/events.dart';
+import 'package:BonaBona/blocs/events.dart';
 
-import '../models/model_dayofvisit.dart';
-import '../pages/screen_meal.dart';
-import '../blocs/bloc_meal.dart';
-import '../blocs/bloc_dof.dart';
+import 'package:BonaBona/models/model_dayofvisit.dart';
+import 'package:BonaBona/pages/screen_meal.dart';
+import 'package:BonaBona/blocs/bloc_meal.dart';
+import 'package:BonaBona/blocs/bloc_dof.dart';
+import 'appbar.dart';
 
 class DayOfVisitScreen extends StatefulWidget {
   DayOfVisitScreen({Key key}) : super(key: key);
@@ -18,9 +19,8 @@ class _DayOfVisitScreenState extends State<DayOfVisitScreen> {
   Widget build(BuildContext context) {
     final DofVisitBloc bloc = BlocProvider.of<DofVisitBloc>(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: const Text('Liste des jours'),
-        backgroundColor: Colors.green,
       ),
       body: Center(
           child: StreamBuilder<List<DayOfVisit>>(

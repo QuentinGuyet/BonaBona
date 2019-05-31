@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../pages/screen_manage_food.dart';
-import '../blocs/bloc_food_list.dart';
-import '../blocs/bloc_food.dart';
-import '../models/model_food.dart';
-import '../blocs/events.dart';
+import 'package:BonaBona/pages/screen_manage_food.dart';
+import 'package:BonaBona/blocs/bloc_food_list.dart';
+import 'package:BonaBona/blocs/bloc_food.dart';
+import 'package:BonaBona/models/model_food.dart';
+import 'package:BonaBona/blocs/events.dart';
+import 'appbar.dart';
 
 class FoodListScreen extends StatefulWidget {
   FoodListScreen({Key key}) : super(key: key);
@@ -18,9 +19,8 @@ class _FoodListScreenState extends State<FoodListScreen> {
   Widget build(BuildContext context) {
     final FoodListBloc bloc = BlocProvider.of<FoodListBloc>(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: Text("Liste des aliments"),
-        backgroundColor: Colors.green,
       ),
       body: StreamBuilder<List<Food>>(
           stream: bloc.outList,

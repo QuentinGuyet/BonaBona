@@ -2,9 +2,10 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../blocs/bloc_visit.dart';
-import '../models/model_visit.dart';
-import '../blocs/events.dart';
+import 'package:BonaBona/blocs/bloc_visit.dart';
+import 'package:BonaBona/models/model_visit.dart';
+import 'package:BonaBona/blocs/events.dart';
+import 'appbar.dart';
 
 class ManageVisitScreen extends StatefulWidget {
   ManageVisitScreen({Key key}) : super(key: key);
@@ -29,9 +30,8 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
     bloc = BlocProvider.of<VisitBloc>(context);
 
     return Scaffold(
-        appBar: AppBar(
+        appBar: CustomAppBar(
           title: const Text('Création d\'un séjour'),
-          backgroundColor: Colors.green,
         ),
         resizeToAvoidBottomPadding: false,
         body: Center(

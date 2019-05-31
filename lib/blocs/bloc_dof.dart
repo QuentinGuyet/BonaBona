@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
-import 'package:testdb/blocs/events.dart';
+import 'package:BonaBona/blocs/events.dart';
 
-import '../models/model_dayofvisit.dart';
-import '../database/database.dart';
+import 'package:BonaBona/models/model_dayofvisit.dart';
+import 'package:BonaBona/database/database.dart';
 
 class DofVisitBloc implements BlocBase {
   List<DayOfVisit> _dofList = [];

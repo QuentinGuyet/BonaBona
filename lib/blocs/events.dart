@@ -1,6 +1,7 @@
 import '../models/model_visit.dart';
 import '../models/model_food.dart';
 import '../models/model_lot.dart';
+import '../models/model_meal.dart';
 
 abstract class VisitListEvent {}
 
@@ -71,6 +72,10 @@ class RemoveLotFromFoodEvent extends FoodEvent {
 
 class UpdateMealListEvent extends MealEvent {}
 
+class UpdateMealEvent extends MealEvent {
+  Meal meal;
+  UpdateMealEvent({this.meal});
+}
 class UpdateFoodEvent extends FoodEvent {
   Food food;
   UpdateFoodEvent({this.food});

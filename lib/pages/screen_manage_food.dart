@@ -4,10 +4,11 @@ import 'package:qr_mobile_vision/qr_camera.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 
-import '../blocs/bloc_food.dart';
-import '../models/model_food.dart';
-import '../models/model_lot.dart';
-import '../blocs/events.dart';
+import 'package:BonaBona/blocs/bloc_food.dart';
+import 'package:BonaBona/models/model_food.dart';
+import 'package:BonaBona/models/model_lot.dart';
+import 'package:BonaBona/blocs/events.dart';
+import 'appbar.dart';
 
 class ManageFoodScreen extends StatefulWidget {
   ManageFoodScreen({Key key}) : super(key: key);
@@ -35,9 +36,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     bloc = BlocProvider.of<FoodBloc>(context);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: const Text('Ajout d\'une nouvelle denrée'),
-        backgroundColor: Colors.green,
       ),
       body: Center(
         child: _streamBuilderForm(),

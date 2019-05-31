@@ -3,12 +3,12 @@ import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
-import '../models/model_food.dart';
-import '../models/model_lot.dart';
-import '../database/database.dart';
+import 'package:BonaBona/models/model_food.dart';
+import 'package:BonaBona/models/model_lot.dart';
+import 'package:BonaBona/database/database.dart';
 import 'events.dart';
 
-import '../ext/OpenFoodLogic.dart';
+import 'package:BonaBona/ext/OpenFoodLogic.dart';
 
 class FoodBloc implements BlocBase {
   Food _food;

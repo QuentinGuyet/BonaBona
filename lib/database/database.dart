@@ -3,11 +3,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path/path.dart';
-import '../models/model_visit.dart';
-import '../models/model_dayofvisit.dart';
-import '../models/model_meal.dart';
-import '../models/model_food.dart';
-import '../models/model_lot.dart';
+import 'package:BonaBona/models/model_visit.dart';
+import 'package:BonaBona/models/model_dayofvisit.dart';
+import 'package:BonaBona/models/model_meal.dart';
+import 'package:BonaBona/models/model_food.dart';
+import 'package:BonaBona/models/model_lot.dart';
 import 'sql.dart';
 import 'package:intl/intl.dart';
 
@@ -185,6 +185,13 @@ class DBProvider {
     final db = await database;
     var res = await db.update("Visit", newVisit.toJson(),
         where: "id_visit = ?", whereArgs: [newVisit.idVisit]);
+    return res;
+  }
+
+  updateMeal(Meal meal) async {
+    final db = await database;
+    var res = await db.update("Meal", meal.toJson(),
+        where: "id_meal = ?", whereArgs: [meal.idMeal]);
     return res;
   }
 

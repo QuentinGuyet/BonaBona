@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 
-import '../models/model_food.dart';
-import '../database/database.dart';
+import 'package:BonaBona/models/model_food.dart';
+import 'package:BonaBona/database/database.dart';
 import 'events.dart';
 
 class FoodListBloc implements BlocBase {

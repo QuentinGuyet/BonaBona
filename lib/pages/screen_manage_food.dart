@@ -212,7 +212,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
               food.imgUrl = _ctrlImgUrl.text;
               food.quantity = num.parse(_ctrlQty.text);
               food.price = _ctrlPrice.numberValue;
-              food.listLots = _lotsList;
+              _lotsList == null ? food.listLots = [] : food.listLots = _lotsList;
               bloc.manageFood.add(new AddFoodEvent(food: food));
               showSnackBarCreate(context);
             } else if (_formKey.currentState.validate() && food != null) {

@@ -5,7 +5,7 @@ import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:BonaBona/blocs/bloc_visit.dart';
 import 'package:BonaBona/models/model_visit.dart';
 import 'package:BonaBona/blocs/events.dart';
-import 'appbar.dart';
+import 'custom_widgets.dart';
 
 class ManageVisitScreen extends StatefulWidget {
   ManageVisitScreen({Key key}) : super(key: key);
@@ -71,6 +71,7 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
           if (value.isEmpty) {
             return "Ce champ ne peut pas être vide.";
           }
+          return null;
         },
         controller: _nameCtrlr,
         style: _biggerFont,
@@ -97,6 +98,7 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
               if (value.isEmpty) {
                 return "Ce champ ne peut pas être vide.";
               }
+              return null;
             },
             controller: _sDateCtrlr,
             style: TextStyle(color: color),
@@ -132,6 +134,7 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
                   .isAfter(DateTime.parse(_invertDateStr(_eDateCtrlr.text)))) {
                 return "La fin du séjour est avant la date de début.";
               }
+              return null;
             },
             controller: _eDateCtrlr,
             enabled: enabled,
@@ -164,17 +167,15 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
                 startDate: _sDateCtrlr.text,
                 endDate: _eDateCtrlr.text);
             bloc.manageVisit.add(AddVisitEvent(visit));
-            showSnackBarCreate(context);
+            showCustomSnackBar(context, visit, action: "create");
           } else if (_formKey.currentState.validate() && visit != null) {
-            
             if (visit.nameVisit != _nameCtrlr.text) {
               visit.nameVisit = _nameCtrlr.text;
               bloc.manageVisit.add(new UpdateVisitEvent(visit));
-              showSnackBarEdit(context);
+              showCustomSnackBar(context, visit, action: "update");
             } else {
-              showSnackBarNothingToUpdate(context);
+              showCustomSnackBar(context, visit);
             }
-            
           }
           setState(() {
             _nameCtrlr.clear();
@@ -184,21 +185,6 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
         },
       ),
     );
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBarCreate(
-      BuildContext context) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text("Le séjour ${_nameCtrlr.text} a été créé."),
-    ));
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBarEdit(
-      BuildContext context) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content:
-          Text("Le séjour ${_nameCtrlr.text} a été correctement mis à jour."),
-    ));
   }
 
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>

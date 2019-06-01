@@ -8,7 +8,7 @@ import 'package:BonaBona/blocs/bloc_food.dart';
 import 'package:BonaBona/models/model_food.dart';
 import 'package:BonaBona/models/model_lot.dart';
 import 'package:BonaBona/blocs/events.dart';
-import 'appbar.dart';
+import 'custom_widgets.dart';
 
 class ManageFoodScreen extends StatefulWidget {
   ManageFoodScreen({Key key}) : super(key: key);
@@ -27,7 +27,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       new MoneyMaskedTextController(decimalSeparator: ",", rightSymbol: "€");
   bool _scannerIsOpen = false;
 
-  List<Lot> _lotsList = [];
+  List<Lot> _lotsList;
   Food food;
   FoodBloc bloc;
 
@@ -70,7 +70,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
-      if (_lotsList.isEmpty && food.listLots != null) {
+      if (_lotsList == null && food.listLots != null) {
+        _lotsList = [];
         _lotsList.addAll(food.listLots);
       }
     }
@@ -93,18 +94,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
               ),
             ),
             SliverList(
-              delegate: _lotsList.isNotEmpty
-                  ? SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                      return listLotTile(index, snapshot);
-                    }, childCount: _lotsList.length)
-                  : SliverChildListDelegate([
-                      ListTile(
-                        title: Center(
-                            child:
-                                Text("Aucun lot enregistré pour cette denrée")),
-                      ),
-                    ]),
+              delegate: buildSliverDelegate(),
             ),
             SliverList(
               delegate: SliverChildListDelegate(
@@ -120,6 +110,20 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
+  buildSliverDelegate() {
+    if (_lotsList != null && _lotsList.isNotEmpty) {
+      return SliverChildBuilderDelegate((BuildContext context, int index) {
+        return listLotTile(index);
+      }, childCount: _lotsList.length);
+    } else {
+      return SliverChildListDelegate([
+        ListTile(
+          title: Center(child: Text("Aucun lot enregistré pour cette denrée")),
+        ),
+      ]);
+    }
+  }
+
   Padding paddingsSavedLotLabel() {
     return Padding(
       padding: EdgeInsets.only(left: 16.0, top: 24.0, bottom: 14.0),
@@ -130,7 +134,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
-  ListTile listLotTile(int index, AsyncSnapshot<Food> snapshot) {
+  ListTile listLotTile(int index) {
     return ListTile(
       title: Padding(
         padding: EdgeInsets.only(left: 16.0),
@@ -309,6 +313,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           if (num.parse(value) < 1) {
             return "La quantité ne peut pas être inférieure à 1";
           }
+          return null;
         },
         decoration: InputDecoration(
             labelText: "Quantité", suffixIcon: Icon(Icons.shopping_cart)),
@@ -328,6 +333,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           if (value.isEmpty) {
             return "Ce champ ne peut pas être vide";
           }
+          return null;
         },
         decoration:
             InputDecoration(labelText: "Nom", suffixIcon: Icon(Icons.edit)),

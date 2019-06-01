@@ -1,4 +1,6 @@
-import 'package:BonaBona/pages/appbar.dart';
+import 'dart:async';
+
+import 'package:BonaBona/pages/custom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -26,9 +28,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
   VisitListBloc bloc;
+  List<Visit> _visitList;
 
+  @override
   Widget build(BuildContext context) {
     bloc = BlocProvider.of<VisitListBloc>(context);
     return Scaffold(
@@ -40,11 +43,12 @@ class _MyHomePageState extends State<MyHomePage> {
             stream: bloc.outList,
             builder:
                 (BuildContext context, AsyncSnapshot<List<Visit>> snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData && snapshot.data.isNotEmpty) {
+                _visitList = snapshot.data;
                 return ListView.builder(
-                  itemCount: snapshot.data.length,
+                  itemCount: _visitList.length,
                   itemBuilder: (BuildContext context, int index) {
-                    Visit v = snapshot.data[index];
+                    Visit v = _visitList[index];
                     return Slidable(
                       delegate: new SlidableDrawerDelegate(),
                       key: UniqueKey(),
@@ -76,19 +80,19 @@ class _MyHomePageState extends State<MyHomePage> {
                           caption: 'Edit',
                           color: Colors.blue,
                           icon: Icons.edit,
-                          onTap: () => {
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<VisitBloc>(
-                                      bloc: VisitBloc(visit: v),
-                                      child: ManageVisitScreen());
-                                })).then((_) {
-                                  setState(() {
-                                    bloc.manageVisitList
-                                        .add(UpdateVisitListEvent());
-                                  });
-                                })
-                              },
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return BlocProvider<VisitBloc>(
+                                  bloc: VisitBloc(visit: v),
+                                  child: ManageVisitScreen());
+                            })).then((_) {
+                              setState(() {
+                                bloc.manageVisitList
+                                    .add(UpdateVisitListEvent());
+                              });
+                            });
+                          },
                         ),
                       ],
                       secondaryActions: <Widget>[
@@ -96,20 +100,29 @@ class _MyHomePageState extends State<MyHomePage> {
                           caption: 'Remove',
                           color: Colors.red,
                           icon: Icons.delete,
-                          onTap: () => _showDeleteDialog(v),
+                          onTap: () {
+                            showDeleteDialog(bloc, v, context);
+                          },
                         )
                       ],
                     );
                   },
                 );
               } else {
-                return Center(child: Text("Rien à afficher"));
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("Aucun séjour pour le moment."),
+                    SizedBox(height: 20),
+                    Text(
+                        "Pour en ajouter un, cliquer sur le bouton en bas à droite."),
+                  ],
+                ));
               }
             }),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
+      floatingActionButton: CustomFloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return BlocProvider<VisitBloc>(
@@ -122,33 +135,5 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
-  }
-
-  Future<bool> _showDeleteDialog(Visit v) async {
-    return await showDialog(
-        context: context,
-        builder: (BuildContext _context) {
-          return AlertDialog(
-            title: new Text('Suppression'),
-            content:
-                new Text('Voulez-vous supprimer le séjour ${v.nameVisit} ?'),
-            actions: <Widget>[
-              new FlatButton(
-                child: new Text("Oui"),
-                onPressed: () {
-                  Navigator.of(_context).pop(true);
-                  bloc.manageVisitList
-                      .add(RemoveVisitEvent(idVisit: v.idVisit));
-                },
-              ),
-              new FlatButton(
-                child: new Text("Non"),
-                onPressed: () {
-                  Navigator.of(_context).pop(false);
-                },
-              )
-            ],
-          );
-        });
   }
 }

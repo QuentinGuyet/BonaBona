@@ -23,6 +23,8 @@ class RemoveVisitEvent extends VisitListEvent {
   RemoveVisitEvent({this.idVisit});
 }
 
+class CancelRemoveVisitEvent extends VisitListEvent {}
+
 class UpdateVisitListEvent extends VisitListEvent {}
 
 class AddVisitListEvent extends VisitListEvent {
@@ -46,29 +48,7 @@ class UpdateDofList extends DofEvent {
   UpdateDofList({this.idVisit});
 }
 
-class RemoveMealEvent extends MealEvent {
-  int idMeal;
-  RemoveMealEvent({this.idMeal});
-}
-
 class AddEmptyMealEvent extends MealEvent {}
-
-class AddFoodEvent extends FoodEvent {
-  Food food;
-  AddFoodEvent({this.food});
-}
-
-class AddLotToFoodEvent extends FoodEvent {
-  Food food;
-  Lot lot;
-  AddLotToFoodEvent({this.food, this.lot});
-}
-
-class RemoveLotFromFoodEvent extends FoodEvent {
-  Food food;
-  Lot lot;
-  RemoveLotFromFoodEvent({this.food, this.lot});
-}
 
 class UpdateMealListEvent extends MealEvent {}
 
@@ -76,9 +56,32 @@ class UpdateMealEvent extends MealEvent {
   Meal meal;
   UpdateMealEvent({this.meal});
 }
-class UpdateFoodEvent extends FoodEvent {
+
+class RemoveMealEvent extends MealEvent {
+  int idMeal;
+  RemoveMealEvent({this.idMeal});
+}
+
+class CancelRemoveMealEvent extends MealEvent {}
+
+class RemoveFoodEvent extends FoodListEvent {
+  int idFood;
+  RemoveFoodEvent({this.idFood});
+}
+
+class CancelRemoveFoodEvent extends FoodListEvent {}
+
+class UpdateFoodListEvent extends FoodListEvent {}
+
+class SearchFoodInAPI extends FoodEvent {
+  String barcode;
+  SearchFoodInAPI({this.barcode});
+}
+
+class AddLotToFoodEvent extends FoodEvent {
   Food food;
-  UpdateFoodEvent({this.food});
+  Lot lot;
+  AddLotToFoodEvent({this.food, this.lot});
 }
 
 class UpdateFoodLotEvent extends FoodEvent {
@@ -88,14 +91,18 @@ class UpdateFoodLotEvent extends FoodEvent {
   UpdateFoodLotEvent({this.idFood, this.newList, this.oldList});
 }
 
-class RemoveFoodEvent extends FoodListEvent {
-  int idFood;
-  RemoveFoodEvent({this.idFood});
+class AddFoodEvent extends FoodEvent {
+  Food food;
+  AddFoodEvent({this.food});
 }
 
-class UpdateFoodListEvent extends FoodListEvent {}
+class RemoveLotFromFoodEvent extends FoodEvent {
+  Food food;
+  Lot lot;
+  RemoveLotFromFoodEvent({this.food, this.lot});
+}
 
-class SearchFoodInAPI extends FoodEvent {
-  String barcode;
-  SearchFoodInAPI({this.barcode});
+class UpdateFoodEvent extends FoodEvent {
+  Food food;
+  UpdateFoodEvent({this.food});
 }

@@ -8,6 +8,8 @@ import 'events.dart';
 
 class VisitListBloc implements BlocBase {
   List<Visit> _visitList;
+  int _idVisitToDelete;
+  Timer _timer;
 
   final _visitListController = BehaviorSubject<List<Visit>>();
   final _actionVisitListController = StreamController<VisitListEvent>();
@@ -18,15 +20,24 @@ class VisitListBloc implements BlocBase {
   StreamSink get manageVisitList => _actionVisitListController.sink;
 
   VisitListBloc() {
-    // print("Construct VisitListBloc...");
     _actionVisitListController.stream.listen(_handleVisitListLogic);
     _getVisitList();
   }
 
   void _handleVisitListLogic(VisitListEvent event) async {
-    // print("HandleVisitListLogic : $event");
     if (event is RemoveVisitEvent) {
-      await DBProvider.db.deleteVisit(event.idVisit);
+      if (_idVisitToDelete != null) {
+        _timer?.cancel();
+        await DBProvider.db.deleteVisit(_idVisitToDelete);
+      }
+      _idVisitToDelete = event.idVisit;
+      _timer = new Timer(const Duration(seconds: 5), () async {
+        await DBProvider.db.deleteVisit(event.idVisit);
+        _idVisitToDelete = null;
+      });
+    } else if (event is CancelRemoveVisitEvent) {
+      _timer?.cancel();
+      _idVisitToDelete = null;
     }
     if (event is UpdateVisitListEvent) {}
 
@@ -34,8 +45,9 @@ class VisitListBloc implements BlocBase {
   }
 
   void _getVisitList() async {
-    // print("Getting list...");
     _visitList = await DBProvider.db.getAllVisits();
+    print(_idVisitToDelete);
+    _visitList.removeWhere((v) => v.idVisit == _idVisitToDelete);
     _notifyVisitList();
   }
 
@@ -43,8 +55,12 @@ class VisitListBloc implements BlocBase {
     _inList.add(_visitList);
   }
 
-  void dispose() {
-    // print("Disposing VisitListBloc");
+  void dispose() async {
+    if (_visitListController != null) {
+      _timer?.cancel();
+      await DBProvider.db.deleteVisit(_idVisitToDelete);
+      _idVisitToDelete = null;
+    }
     _visitListController.close();
     _actionVisitListController.close();
   }

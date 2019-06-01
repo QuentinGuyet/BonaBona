@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -7,10 +9,12 @@ import 'package:BonaBona/blocs/bloc_meal.dart';
 import 'package:BonaBona/models/model_meal.dart';
 import 'package:BonaBona/pages/screen_food_list.dart';
 import 'package:BonaBona/blocs/events.dart';
-import 'appbar.dart';
+import 'custom_widgets.dart';
 
 class MealScreen extends StatefulWidget {
   MealScreen({Key key}) : super(key: key);
+  static _MealScreenState of(BuildContext context) =>
+      context.ancestorStateOfType(const TypeMatcher<_MealScreenState>());
 
   _MealScreenState createState() => _MealScreenState();
 }
@@ -19,6 +23,7 @@ class _MealScreenState extends State<MealScreen> {
   MealBloc bloc;
   var editIndex;
   var _ctrlEditName = new TextEditingController();
+  List<Meal> _mealList;
 
   @override
   Widget build(BuildContext context) {
@@ -30,40 +35,16 @@ class _MealScreenState extends State<MealScreen> {
       body: StreamBuilder<List<Meal>>(
           stream: bloc.outList,
           builder: (BuildContext context, AsyncSnapshot<List<Meal>> snapshot) {
-            if (snapshot.hasData) {
+            if (snapshot.hasData && snapshot.data.isNotEmpty) {
+              _mealList = snapshot.data;
               return ListView.builder(
-                itemCount: snapshot.data.length,
+                itemCount: _mealList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  Meal m = snapshot.data[index];
+                  Meal meal = _mealList[index];
                   if (editIndex != index) {
-                    return Slidable(
-                      key: UniqueKey(),
-                      delegate: SlidableDrawerDelegate(),
-                      child: Container(
-                        child: buildListTileNameMeal(m, context),
-                      ),
-                      actions: <Widget>[
-                        new IconSlideAction(
-                          caption: 'Edit name',
-                          color: Colors.blue,
-                          icon: Icons.edit,
-                          onTap: () {
-                            editIndex = index;
-                            setState(() {});
-                          },
-                        )
-                      ],
-                      secondaryActions: <Widget>[
-                        new IconSlideAction(
-                          caption: 'Remove',
-                          color: Colors.red,
-                          icon: Icons.delete,
-                          onTap: () => _showDeleteDialog(m),
-                        )
-                      ],
-                    );
+                    return buildSlidable(meal, context, index);
                   } else {
-                    return buildListTileEditNameMeal(m, context);
+                    return buildListTileEditNameMeal(meal, context);
                   }
                 },
               );
@@ -73,13 +54,41 @@ class _MealScreenState extends State<MealScreen> {
               );
             }
           }),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
+      floatingActionButton: CustomFloatingActionButton(
         onPressed: () {
           bloc.manageMealList.add(AddEmptyMealEvent());
         },
       ),
+    );
+  }
+
+  Slidable buildSlidable(Meal m, BuildContext context, int index) {
+    return Slidable(
+      key: UniqueKey(),
+      delegate: SlidableDrawerDelegate(),
+      child: Container(
+        child: buildListTileNameMeal(m, context),
+      ),
+      actions: <Widget>[
+        new IconSlideAction(
+          caption: 'Edit name',
+          color: Colors.blue,
+          icon: Icons.edit,
+          onTap: () {
+            editIndex = index;
+            setState(() {});
+          },
+        )
+      ],
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+            caption: 'Remove',
+            color: Colors.red,
+            icon: Icons.delete,
+            onTap: () {
+              showDeleteDialog(bloc, m, context);
+            })
+      ],
     );
   }
 
@@ -121,31 +130,5 @@ class _MealScreenState extends State<MealScreen> {
         },
       ),
     );
-  }
-
-  Future<bool> _showDeleteDialog(Meal m) async {
-    return await showDialog(
-        context: context,
-        builder: (BuildContext _context) {
-          return AlertDialog(
-            title: new Text('Suppression'),
-            content: new Text('Voulez-vous supprimer le menu ${m.nameMeal} ?'),
-            actions: <Widget>[
-              new FlatButton(
-                child: new Text("Oui"),
-                onPressed: () {
-                  Navigator.of(_context).pop(true);
-                  bloc.manageMealList.add(RemoveMealEvent(idMeal: m.idMeal));
-                },
-              ),
-              new FlatButton(
-                child: new Text("Non"),
-                onPressed: () {
-                  Navigator.of(_context).pop(false);
-                },
-              )
-            ],
-          );
-        });
   }
 }

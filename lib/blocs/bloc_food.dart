@@ -12,7 +12,7 @@ import 'package:BonaBona/ext/OpenFoodLogic.dart';
 
 class FoodBloc implements BlocBase {
   Food _food;
-  List<Lot> _listLot;
+  List<Lot> _listLot = [];
   int idFood;
   int idMeal;
   int _idFood;

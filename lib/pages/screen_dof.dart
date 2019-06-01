@@ -6,7 +6,7 @@ import 'package:BonaBona/models/model_dayofvisit.dart';
 import 'package:BonaBona/pages/screen_meal.dart';
 import 'package:BonaBona/blocs/bloc_meal.dart';
 import 'package:BonaBona/blocs/bloc_dof.dart';
-import 'appbar.dart';
+import 'custom_widgets.dart';
 
 class DayOfVisitScreen extends StatefulWidget {
   DayOfVisitScreen({Key key}) : super(key: key);
@@ -42,6 +42,7 @@ class _DayOfVisitScreenState extends State<DayOfVisitScreen> {
                             return BlocProvider<MealBloc>(
                                 bloc: MealBloc(dof.idDay), child: MealScreen());
                           })).then((_) {
+                            print("mag");
                             bloc.manageDovList
                                 .add(UpdateDofList(idVisit: dof.idVisit));
                             setState(() {});

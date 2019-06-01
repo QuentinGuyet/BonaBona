@@ -9,6 +9,8 @@ import 'events.dart';
 class MealBloc implements BlocBase {
   List<Meal> _mealList = [];
   int _idDay;
+  int _idMealToDelete;
+  Timer _timer;
 
   final _mealListController = StreamController<List<Meal>>();
   StreamSink<List<Meal>> get _inList => _mealListController.sink;
@@ -26,6 +28,7 @@ class MealBloc implements BlocBase {
 
   void _getList() async {
     _mealList = await DBProvider.db.getAllMealsOfDay(_idDay);
+    _mealList.removeWhere((m) => m.idMeal == _idMealToDelete);
     _notify();
   }
 
@@ -33,7 +36,17 @@ class MealBloc implements BlocBase {
     if (event is AddEmptyMealEvent) {
       await DBProvider.db.insertMeal(_idDay);
     } else if (event is RemoveMealEvent) {
-      await DBProvider.db.deleteMeal(event.idMeal);
+      if (_idMealToDelete != null) {
+        _timer?.cancel();
+        await DBProvider.db.deleteMeal(_idMealToDelete);
+      }
+      _idMealToDelete = event.idMeal;
+      _timer = new Timer(const Duration(seconds: 5), () async {
+        await DBProvider.db.deleteMeal(event.idMeal);
+      });
+    } else if (event is CancelRemoveMealEvent) {
+      _timer?.cancel();
+      _idMealToDelete = null;
     } else if (event is UpdateMealEvent) {
       await DBProvider.db.updateMeal(event.meal);
     } else if (event is UpdateMealListEvent) {}
@@ -44,7 +57,13 @@ class MealBloc implements BlocBase {
     _inList.add(_mealList);
   }
 
-  void dispose() {
+  void dispose() async {
+    if (_idMealToDelete != null) {
+      _timer?.cancel();
+      await DBProvider.db.deleteMeal(_idMealToDelete);
+      print("delete");
+      _idMealToDelete = null;
+    }
     _mealListController.close();
     _actionMealListController.close();
   }

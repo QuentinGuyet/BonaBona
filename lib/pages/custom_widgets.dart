@@ -22,50 +22,6 @@ class CustomFloatingActionButton extends FloatingActionButton {
             onPressed: onPressed);
 }
 
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showCustomSnackBar(
-    BuildContext context, dynamic object,
-    {String action = "", CustomSnackBarAction customSnackBarAction}) {
-  String prefix;
-  String suffix;
-  String name;
-
-  if (action.isEmpty) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text("Aucune donnée n'a été mise à jour"),
-    ));
-  }
-
-  switch (action) {
-    case "create":
-      suffix = " a été créé";
-      break;
-    case "update":
-      suffix = " a été mis à jour";
-      break;
-    case "delete":
-      suffix = " a été supprimé";
-      break;
-    default:
-      break;
-  }
-
-  if (object is Visit) {
-    prefix = "Le séjour ";
-    name = object.nameVisit;
-  } else if (object is Food) {
-    prefix = "L'aliment ";
-    name = object.nameFood;
-  } else if (object is Meal) {
-    prefix = "Le menu ";
-    name = object.nameMeal;
-  }
-
-  return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text(prefix + name + suffix),
-      duration: Duration(seconds: 5),
-      action: customSnackBarAction));
-}
-
 class CustomSnackBarAction extends SnackBarAction {
   CustomSnackBarAction({Key key, dynamic onPressed})
       : super(key: key, label: "Annuler", onPressed: onPressed);
@@ -112,8 +68,60 @@ class CustomFlatYesButton extends FlatButton {
                 Scaffold.of(parentContext).removeCurrentSnackBar();
               }
               showCustomSnackBar(parentContext, object,
-                  action: "delete", customSnackBarAction: csba);
+                  action: SnackBarOperation.delete, customSnackBarAction: csba);
             });
+}
+
+enum SnackBarOperation {
+  none,
+  create,
+  update,
+  delete,
+}
+
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showCustomSnackBar(
+    BuildContext context, dynamic object,
+    {SnackBarOperation action = SnackBarOperation.none,
+    CustomSnackBarAction customSnackBarAction}) {
+  String prefix;
+  String suffix;
+  String name;
+
+  if (action == SnackBarOperation.none) {
+    return Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text("Aucune donnée n'a été mise à jour"),
+    ));
+  }
+
+  switch (action) {
+    case SnackBarOperation.create:
+      suffix = " a été créé";
+      break;
+    case SnackBarOperation.update:
+      suffix = " a été mis à jour";
+      break;
+    case SnackBarOperation.delete:
+      suffix = " a été supprimé";
+      break;
+    default:
+      break;
+  }
+
+  if (object is Visit) {
+    prefix = "Le séjour ";
+    name = object.nameVisit;
+  } else if (object is Food) {
+    prefix = "L'aliment ";
+    name = object.nameFood;
+  } else if (object is Meal) {
+    prefix = "Le menu ";
+    name = object.nameMeal;
+  }
+
+  return Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text(prefix + name + suffix),
+      duration: Duration(seconds: 1),
+      action: customSnackBarAction));
 }
 
 Future<bool> showDeleteDialog(

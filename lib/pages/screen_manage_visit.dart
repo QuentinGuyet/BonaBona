@@ -167,12 +167,12 @@ class _ManageVisitScreenState extends State<ManageVisitScreen> {
                 startDate: _sDateCtrlr.text,
                 endDate: _eDateCtrlr.text);
             bloc.manageVisit.add(AddVisitEvent(visit));
-            showCustomSnackBar(context, visit, action: "create");
+            showCustomSnackBar(context, visit, action: SnackBarOperation.create);
           } else if (_formKey.currentState.validate() && visit != null) {
             if (visit.nameVisit != _nameCtrlr.text) {
               visit.nameVisit = _nameCtrlr.text;
               bloc.manageVisit.add(new UpdateVisitEvent(visit));
-              showCustomSnackBar(context, visit, action: "update");
+              showCustomSnackBar(context, visit, action: SnackBarOperation.update);
             } else {
               showCustomSnackBar(context, visit);
             }

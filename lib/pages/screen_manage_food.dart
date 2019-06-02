@@ -27,9 +27,10 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       new MoneyMaskedTextController(decimalSeparator: ",", rightSymbol: "€");
   bool _scannerIsOpen = false;
 
-  List<Lot> _lotsList;
+  List<Lot> _lotsList = [];
   Food food;
   FoodBloc bloc;
+  bool changed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +51,12 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     return StreamBuilder<Food>(
       stream: bloc.outFood,
       builder: (context, snapshot) {
-        return formAddFood(bloc, snapshot, context);
+        return formAddFood(snapshot, context);
       },
     );
   }
 
-  Form formAddFood(
-      FoodBloc bloc, AsyncSnapshot<Food> snapshot, BuildContext context) {
+  Form formAddFood(AsyncSnapshot<Food> snapshot, BuildContext context) {
     if (snapshot.hasData) {
       food = snapshot.data;
       if (food.nameFood != null && _ctrlName.text.isEmpty)
@@ -70,10 +70,12 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
-      if (_lotsList == null && food.listLots != null) {
-        _lotsList = [];
+      if (_lotsList.isEmpty && !changed && food.listLots != null) {
         _lotsList.addAll(food.listLots);
+        changed = true;
       }
+    } else {
+      food = new Food();
     }
 
     return Form(
@@ -118,7 +120,9 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     } else {
       return SliverChildListDelegate([
         ListTile(
-          title: Center(child: Text("Aucun lot enregistré pour cette denrée")),
+          title: Center(
+            child: Text("Aucun lot enregistré pour cette denrée"),
+          ),
         ),
       ]);
     }
@@ -143,6 +147,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       trailing: IconButton(
         icon: Icon(Icons.delete),
         onPressed: () {
+          if (!changed) changed = true;
           _lotsList.removeWhere((l) => l.numLot == _lotsList[index].numLot);
           setState(() {});
         },
@@ -163,6 +168,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           icon: Icon(Icons.add),
           onPressed: () {
             if (_ctrlLot.text.isNotEmpty) {
+              if (!changed) changed = true;
               Lot l = new Lot(numLot: _ctrlLot.text);
               _lotsList.add(l);
               _ctrlLot.clear();
@@ -178,7 +184,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         padding: EdgeInsets.all(12.0),
         child: Center(
           child: Container(
-            // decoration: BoxDecoration(border: Border.all()),
             constraints: new BoxConstraints.loose(new Size(800, 150)),
             child: barCodeScanner(),
           ),
@@ -188,14 +193,13 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         setState(() {
           _scannerIsOpen = !_scannerIsOpen;
         });
-        // bloc.manageFood.add(SearchFoodInAPI(barcode: "3268840001008"));
       },
     );
   }
 
   Padding paddingButton(BuildContext context) {
     String btnText = "Créer";
-    if (food != null) {
+    if (food.idFood != null) {
       btnText = "Mettre à jour";
     }
     return Padding(
@@ -204,22 +208,22 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           child: Text(btnText),
           onPressed: () {
             FocusScope.of(context).requestFocus(new FocusNode());
-            if (_formKey.currentState.validate() && food == null) {
-              food = new Food();
+            if (_formKey.currentState.validate() && food.idFood == null) {
               food.idMeal = bloc.idMeal;
               food.nameFood = _ctrlName.text;
               food.brandsName = _ctrlBrand.text;
               food.imgUrl = _ctrlImgUrl.text;
               food.quantity = num.parse(_ctrlQty.text);
               food.price = _ctrlPrice.numberValue;
-              _lotsList == null ? food.listLots = [] : food.listLots = _lotsList;
+              food.listLots = _lotsList;
               bloc.manageFood.add(new AddFoodEvent(food: food));
-              showSnackBarCreate(context);
-            } else if (_formKey.currentState.validate() && food != null) {
+              showCustomSnackBar(context, food, action: SnackBarOperation.create);
+            } else if (_formKey.currentState.validate() &&
+                food.idFood != null) {
               if (updateFood() || updateLotFood()) {
-                showSnackBarEdit(context);
+                showCustomSnackBar(context, food, action: SnackBarOperation.update);
               } else {
-                showSnackBarNothingToUpdate(context);
+                showCustomSnackBar(context, food, action: SnackBarOperation.none);
               }
             }
             setState(() {});
@@ -343,7 +347,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   }
 
   barCodeScanner() {
-    if (food != null) {
+    if (food.idFood != null) {
       if (food.imgUrl != null) {
         if (food.imgUrl == "") {
           return Center(

@@ -105,7 +105,6 @@ class FoodBloc implements BlocBase {
     String brand = p.brands;
     String imgUrl = p.imgSmallUrl;
     Food f = new Food(nameFood: name, brandsName: brand, imgUrl: imgUrl);
-    print("${f.nameFood} - ${f.brandsName} - ${f.imgUrl}");
     _food = f;
   }
 

@@ -33,12 +33,18 @@ dependencies:
   intl_translation: ^0.17.3
   flutter_masked_text: ^0.8.0
   flutter_date_picker: "^0.1.8"
+  flutter_launcher_icons: "^0.7.2"
   datetime_picker_formfield: "^0.1.7"
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/bonabona_icon.png"
 
 
 # For information on the generic Dart part of this file, see the

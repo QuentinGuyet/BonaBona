@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:BonaBona/pages/custom_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';

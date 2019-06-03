@@ -56,7 +56,12 @@ class FoodListBloc implements BlocBase {
     _inList.add(_foodList);
   }
 
-  void dispose() {
+  void dispose() async {
+    if (_foodListController != null) {
+      _timer?.cancel();
+      await DBProvider.db.deleteFood(_idFoodToDelete);
+      _idFoodToDelete = null;
+    }
     _foodListController.close();
     _actionFoodListController.close();
   }

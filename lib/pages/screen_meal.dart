@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';

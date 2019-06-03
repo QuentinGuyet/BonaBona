@@ -10,9 +10,21 @@ import 'events.dart';
 
 import 'package:BonaBona/ext/OpenFoodLogic.dart';
 
+enum LoadingState {
+  notStarted,
+  started,
+  loading,
+  finished,
+}
+
+enum DataState {
+  none,
+  found,
+  notFound,
+}
+
 class FoodBloc implements BlocBase {
   Food _food;
-  List<Lot> _listLot = [];
   int idFood;
   int idMeal;
   int _idFood;
@@ -25,6 +37,13 @@ class FoodBloc implements BlocBase {
 
   final _actionFoodController = BehaviorSubject<FoodEvent>();
 
+  final _dataStateSubject = BehaviorSubject<DataState>.seeded(DataState.none);
+  final _loadingStateSubject =
+      BehaviorSubject<LoadingState>.seeded(LoadingState.notStarted);
+
+  Stream<DataState> get productState => _dataStateSubject.stream;
+  Stream<LoadingState> get loadingProductState => _loadingStateSubject.stream;
+
   StreamSink get manageFood => _actionFoodController.sink;
 
   String get barCode => _barCode;
@@ -34,40 +53,56 @@ class FoodBloc implements BlocBase {
 
     if (idFood != null) {
       _idFood = idFood;
-      _getFood();
-      _getLots();
+      _getFood().then((_) {
+        if (_idFood != null && _food != null && _food.listLots == null) {
+          _getLots().then((_) => _notify());
+        }
+      });
     }
-
-    _notify();
   }
 
-  void _getFood() async {
+  Future<Null> _getFood() async {
     _food = await DBProvider.db.getFood(_idFood);
     _notify();
   }
 
-  void _getLots() async {
-    _listLot = await DBProvider.db.getLots(_idFood);
-    _food.listLots = _listLot;
+  Future<Null> _getLots() async {
+    _food.listLots = await DBProvider.db.getLots(_idFood);
     _notify();
   }
 
   void _handleLogic(FoodEvent event) async {
     if (event is AddFoodEvent) {
       await DBProvider.db.insertFood(event.food);
-      for (Lot lot in event.food.listLots) {
-        lot.idFood = event.food.idFood;
-        await DBProvider.db.insertLot(lot);
+      if (event.food.listLots != null) {
+        for (Lot lot in event.food.listLots) {
+          lot.idFood = event.food.idFood;
+          await DBProvider.db.insertLot(lot);
+        }
       }
     } else if (event is UpdateFoodEvent) {
       await DBProvider.db.updateFood(event.food);
     } else if (event is UpdateFoodLotEvent) {
       updateLotFood(event.idFood, event.oldList, event.newList);
     } else if (event is SearchFoodInAPI) {
-      _barCode = event.barcode;
-      Product p = await OpenFoodLogic.ofl.getProduct(event.barcode);
-      if (p != null) {
-        createFoodFromAPI(p);
+      if (_barCode.isEmpty) {
+        // _loadingStateSubject.add(LoadingState.started);
+        _barCode = event.barcode;
+        _loadingStateSubject.add(LoadingState.loading);
+        Product p = await OpenFoodLogic.ofl.getProduct(event.barcode).then((p) {
+          _loadingStateSubject.add(LoadingState.finished);
+          if (p == null) {
+            _dataStateSubject.add(DataState.notFound);
+          } else {
+            _dataStateSubject.add(DataState.found);
+          }
+          return p;
+        });
+
+        if (p != null) {
+          createFoodFromAPI(p);
+        }
+        _barCode = "";
       }
     }
     _notify();
@@ -114,6 +149,8 @@ class FoodBloc implements BlocBase {
 
   void dispose() {
     _foodController.close();
+    _dataStateSubject.close();
+    _loadingStateSubject.close();
     _actionFoodController.close();
   }
 }

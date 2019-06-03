@@ -27,7 +27,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       new MoneyMaskedTextController(decimalSeparator: ",", rightSymbol: "€");
   bool _scannerIsOpen = false;
 
-  List<Lot> _lotsList = [];
+  List<Lot> _listLots;
   Food food;
   FoodBloc bloc;
   bool changed = false;
@@ -70,9 +70,9 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
-      if (_lotsList.isEmpty && !changed && food.listLots != null) {
-        _lotsList.addAll(food.listLots);
-        changed = true;
+      if (food.listLots != null && _listLots == null) {
+        _listLots = new List<Lot>();
+        _listLots.addAll(food.listLots);
       }
     } else {
       food = new Food();
@@ -113,10 +113,10 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   }
 
   buildSliverDelegate() {
-    if (_lotsList != null && _lotsList.isNotEmpty) {
+    if (_listLots != null && _listLots.isNotEmpty) {
       return SliverChildBuilderDelegate((BuildContext context, int index) {
         return listLotTile(index);
-      }, childCount: _lotsList.length);
+      }, childCount: _listLots.length);
     } else {
       return SliverChildListDelegate([
         ListTile(
@@ -142,13 +142,13 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     return ListTile(
       title: Padding(
         padding: EdgeInsets.only(left: 16.0),
-        child: Text(_lotsList[index].numLot.toString()),
+        child: Text(_listLots[index].numLot.toString()),
       ),
       trailing: IconButton(
         icon: Icon(Icons.delete),
         onPressed: () {
           if (!changed) changed = true;
-          _lotsList.removeWhere((l) => l.numLot == _lotsList[index].numLot);
+          _listLots.removeWhere((l) => l.numLot == _listLots[index].numLot);
           setState(() {});
         },
       ),
@@ -170,30 +170,11 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
             if (_ctrlLot.text.isNotEmpty) {
               if (!changed) changed = true;
               Lot l = new Lot(numLot: _ctrlLot.text);
-              _lotsList.add(l);
+              _listLots.add(l);
               _ctrlLot.clear();
               setState(() {});
             }
           }),
-    );
-  }
-
-  InkWell inkWellPaddingImg() {
-    return InkWell(
-      child: Padding(
-        padding: EdgeInsets.all(12.0),
-        child: Center(
-          child: Container(
-            constraints: new BoxConstraints.loose(new Size(800, 150)),
-            child: barCodeScanner(),
-          ),
-        ),
-      ),
-      onTap: () {
-        setState(() {
-          _scannerIsOpen = !_scannerIsOpen;
-        });
-      },
     );
   }
 
@@ -215,15 +196,18 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
               food.imgUrl = _ctrlImgUrl.text;
               food.quantity = num.parse(_ctrlQty.text);
               food.price = _ctrlPrice.numberValue;
-              food.listLots = _lotsList;
+              food.listLots = _listLots;
               bloc.manageFood.add(new AddFoodEvent(food: food));
-              showCustomSnackBar(context, food, action: SnackBarOperation.create);
+              showCustomSnackBar(context, food,
+                  action: SnackBarOperation.create);
             } else if (_formKey.currentState.validate() &&
                 food.idFood != null) {
               if (updateFood() || updateLotFood()) {
-                showCustomSnackBar(context, food, action: SnackBarOperation.update);
+                showCustomSnackBar(context, food,
+                    action: SnackBarOperation.update);
               } else {
-                showCustomSnackBar(context, food, action: SnackBarOperation.none);
+                showCustomSnackBar(context, food,
+                    action: SnackBarOperation.none);
               }
             }
             setState(() {});
@@ -233,10 +217,10 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
 
   bool updateLotFood() {
     bool _updated = false;
-    if (food.listLots != _lotsList) {
+    if (food.listLots != _listLots) {
       _updated = true;
       bloc.manageFood.add(new UpdateFoodLotEvent(
-          idFood: food.idFood, oldList: food.listLots, newList: _lotsList));
+          idFood: food.idFood, oldList: food.listLots, newList: _listLots));
     }
     return _updated;
   }
@@ -346,46 +330,103 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     );
   }
 
-  barCodeScanner() {
-    if (food.idFood != null) {
-      if (food.imgUrl != null) {
-        if (food.imgUrl == "") {
-          return Center(
-            child: Text("Aucune image disponible"),
-          );
+  InkWell inkWellPaddingImg() {
+    return InkWell(
+      child: Padding(
+        padding: EdgeInsets.all(12.0),
+        child: Container(
+          child: Center(
+              child: Container(
+            constraints: new BoxConstraints.loose(new Size(800, 150)),
+            child: imageZone(),
+          )),
+        ),
+      ),
+      onTap: () {
+        if (food.idFood == null) {
+          setState(() {
+            _scannerIsOpen = !_scannerIsOpen;
+          });
         }
-        return new Image(image: NetworkImage(food.imgUrl));
-      }
-    } else if (!_scannerIsOpen) {
-      return Center(
-        child: Text("Taper pour scanner un code-barres"),
-      );
-    } else {
+      },
+    );
+  }
+
+  imageZone() {
+    if (_scannerIsOpen) {
       return new QrCamera(qrCodeCallback: (code) {
         bloc.manageFood.add(SearchFoodInAPI(barcode: code));
-        setState(() {});
+        setState(() {
+          _scannerIsOpen = !_scannerIsOpen;
+        });
       });
+    } else if (!_scannerIsOpen && food.imgUrl != null) {
+      if (food.imgUrl.isNotEmpty)
+        return imageFromFood();
+      else {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                Icons.broken_image,
+                size: 50.0,
+              ),
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text("Pas d'image disponible pour ce produit"),
+              ),
+            ],
+          ),
+        );
+      }
     }
+    return StreamBuilder(
+      stream: bloc.productState,
+      builder: (BuildContext dataStateContext,
+          AsyncSnapshot<DataState> dataStateSnapshot) {
+        return StreamBuilder(
+            stream: bloc.loadingProductState,
+            builder: (BuildContext loadingStateContext,
+                AsyncSnapshot<LoadingState> loadingStateSnapshot) {
+              if (!loadingStateSnapshot.hasData) {
+                // Loading
+                return Center(
+                  child: new CircularProgressIndicator(),
+                );
+              }
+              if (dataStateSnapshot.hasData &&
+                  dataStateSnapshot.data == DataState.notFound) {
+                // NotFound
+                return Center(
+                  child: Text("Produit non trouvé"),
+                );
+              } else {
+                //Not started
+                return Center(
+                  child: Text("Taper pour scanner un code-barres"),
+                );
+              }
+            });
+      },
+    );
   }
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBarCreate(
-      BuildContext context) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text("Création réussie"),
-    ));
-  }
+  // inkWellScanner() {
+  //   return StreamBuilder(
+  //       stream: bloc.searchStarted,
+  //       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+  //         if (snapshot.hasData && snapshot.data) {
+  //         } else if (food.idFood != null) {
+  // return
+  //           ));
+  //         } else {}
+  //       });
+  // }
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBarEdit(
-      BuildContext context) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text("Mise à jour effectuée avec succès"),
-    ));
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>
-      showSnackBarNothingToUpdate(BuildContext context) {
-    return Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text("Aucune donnée n'a été mise à jour"),
-    ));
+  Image imageFromFood() {
+    return new Image(
+      image: NetworkImage(food.imgUrl),
+    );
   }
 }

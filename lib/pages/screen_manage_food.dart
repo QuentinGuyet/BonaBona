@@ -74,11 +74,11 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         _listLots = new List<Lot>();
         _listLots.addAll(food.listLots);
       }
-      if (_listLots == null) {
-        _listLots = new List<Lot>();
-      }
     } else {
       food = new Food();
+    }
+    if (_listLots == null) {
+      _listLots = new List<Lot>();
     }
 
     return Form(

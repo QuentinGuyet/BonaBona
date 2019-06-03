@@ -40,9 +40,12 @@ class FoodBloc implements BlocBase {
   final _dataStateSubject = BehaviorSubject<DataState>.seeded(DataState.none);
   final _loadingStateSubject =
       BehaviorSubject<LoadingState>.seeded(LoadingState.notStarted);
+  final _listLotHasChanged = BehaviorSubject<bool>.seeded(false);
 
   Stream<DataState> get productState => _dataStateSubject.stream;
   Stream<LoadingState> get loadingProductState => _loadingStateSubject.stream;
+  Stream<bool> get listLotHasChanged => _listLotHasChanged.stream;
+  
 
   StreamSink get manageFood => _actionFoodController.sink;
 
@@ -79,7 +82,7 @@ class FoodBloc implements BlocBase {
     } else if (event is UpdateFoodEvent) {
       await DBProvider.db.updateFood(event.food);
     } else if (event is UpdateFoodLotEvent) {
-      updateLotFood(event.idFood, event.oldList, event.newList);
+      updateLotFood(event.idFood, event.newList);
     } else if (event is SearchFoodInAPI) {
       if (_barCode.isEmpty) {
         _barCode = event.barcode;
@@ -109,7 +112,8 @@ class FoodBloc implements BlocBase {
       Si le lot n'apparait pas dans la nouvelle, c'est
       qu'il a été supprimé : on le retire donc de la BDD 
   */
-  void updateLotFood(int idFood, List<Lot> oldList, List<Lot> newList) async {
+  void updateLotFood(int idFood, List<Lot> newList) async {
+    List<Lot> oldList = await DBProvider.db.getLots(idFood);
     for (Lot lot in newList) {
       if (lot.idFood == null) {
         lot.idFood = idFood;
@@ -146,6 +150,7 @@ class FoodBloc implements BlocBase {
     _foodController.close();
     _dataStateSubject.close();
     _loadingStateSubject.close();
+    _listLotHasChanged.close();
     _actionFoodController.close();
   }
 }

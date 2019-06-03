@@ -27,7 +27,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       new MoneyMaskedTextController(decimalSeparator: ",", rightSymbol: "€");
   bool _scannerIsOpen = false;
 
-  List<Lot> _listLots;
   Food food;
   FoodBloc bloc;
   bool changed = false;
@@ -70,15 +69,11 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
-      if (food.listLots != null && _listLots == null) {
-        _listLots = new List<Lot>();
-        _listLots.addAll(food.listLots);
-      }
-      if (_listLots == null) {
-        _listLots = new List<Lot>();
+      if(food.listLots == null) {
+        food.listLots = new List<Lot>();
       }
     } else {
-      food = new Food();
+      food = new Food(listLots: new List<Lot>());
     }
 
     return Form(
@@ -116,10 +111,10 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   }
 
   buildSliverDelegate() {
-    if (_listLots != null && _listLots.isNotEmpty) {
+    if (food.listLots != null && food.listLots.isNotEmpty) {
       return SliverChildBuilderDelegate((BuildContext context, int index) {
         return listLotTile(index);
-      }, childCount: _listLots.length);
+      }, childCount: food.listLots.length);
     } else {
       return SliverChildListDelegate([
         ListTile(
@@ -145,13 +140,13 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     return ListTile(
       title: Padding(
         padding: EdgeInsets.only(left: 16.0),
-        child: Text(_listLots[index].numLot.toString()),
+        child: Text(food.listLots[index].numLot.toString()),
       ),
       trailing: IconButton(
         icon: Icon(Icons.delete),
         onPressed: () {
           if (!changed) changed = true;
-          _listLots.removeWhere((l) => l.numLot == _listLots[index].numLot);
+          food.listLots.removeWhere((l) => l.numLot == food.listLots[index].numLot);
           setState(() {});
         },
       ),
@@ -172,7 +167,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           onPressed: () {
             if (_ctrlLot.text.isNotEmpty) {
               Lot l = new Lot(numLot: _ctrlLot.text);
-              _listLots.add(l);
+              food.listLots.add(l);
+              if (!changed) changed = true;
               _ctrlLot.clear();
               setState(() {});
             }
@@ -198,8 +194,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
               food.imgUrl = _ctrlImgUrl.text;
               food.quantity = num.parse(_ctrlQty.text);
               food.price = _ctrlPrice.numberValue;
-              food.listLots = new List<Lot>();
-              food.listLots.addAll(_listLots);
               bloc.manageFood.add(new AddFoodEvent(food: food));
               showCustomSnackBar(context, food,
                   action: SnackBarOperation.create);
@@ -219,13 +213,10 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   }
 
   bool updateLotFood() {
-    bool _updated = false;
-    if (food.listLots != _listLots) {
-      _updated = true;
-      bloc.manageFood.add(new UpdateFoodLotEvent(
-          idFood: food.idFood, oldList: food.listLots, newList: _listLots));
+    if (changed) {
+      bloc.manageFood.add(new UpdateFoodLotEvent(idFood: food.idFood, newList: food.listLots));
     }
-    return _updated;
+    return changed;
   }
 
   bool updateFood() {
@@ -414,18 +405,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       },
     );
   }
-
-  // inkWellScanner() {
-  //   return StreamBuilder(
-  //       stream: bloc.searchStarted,
-  //       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-  //         if (snapshot.hasData && snapshot.data) {
-  //         } else if (food.idFood != null) {
-  // return
-  //           ));
-  //         } else {}
-  //       });
-  // }
 
   Image imageFromFood() {
     return new Image(

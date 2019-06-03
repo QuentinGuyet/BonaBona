@@ -154,9 +154,10 @@ class DBProvider {
   insertLot(Lot lot) async {
     final db = await database;
     var raw = await db.rawQuery(
-        "SELECT 1 FROM Lot WHERE num_lot = '${lot.numLot}' AND id_food = ${lot.idFood}");
+        "SELECT 1 FROM Lot WHERE num_lot = ? AND id_food = ?", [lot.numLot, lot.idFood]);
     if (raw.isNotEmpty) return;
-    await db.insert("Lot", lot.toJson());
+    // await db.insert("Lot", lot.toJson());
+    await db.rawInsert("INSERT OR IGNORE INTO Lot (num_lot, id_food) VALUES (?, ?) ", [lot.numLot, lot.idFood]);
   }
 
   deleteLot(Lot lot) async {

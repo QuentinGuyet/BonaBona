@@ -120,7 +120,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showCustomSnackBar(
 
   return Scaffold.of(context).showSnackBar(SnackBar(
       content: Text(prefix + name + suffix),
-      duration: Duration(seconds: 1),
+      duration: Duration(seconds: 5),
       action: customSnackBarAction));
 }
 

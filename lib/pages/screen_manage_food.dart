@@ -74,6 +74,9 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         _listLots = new List<Lot>();
         _listLots.addAll(food.listLots);
       }
+      if (_listLots == null) {
+        _listLots = new List<Lot>();
+      }
     } else {
       food = new Food();
     }
@@ -168,7 +171,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
           icon: Icon(Icons.add),
           onPressed: () {
             if (_ctrlLot.text.isNotEmpty) {
-              if (!changed) changed = true;
               Lot l = new Lot(numLot: _ctrlLot.text);
               _listLots.add(l);
               _ctrlLot.clear();
@@ -196,7 +198,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
               food.imgUrl = _ctrlImgUrl.text;
               food.quantity = num.parse(_ctrlQty.text);
               food.price = _ctrlPrice.numberValue;
-              food.listLots = _listLots;
+              food.listLots = new List<Lot>();
+              food.listLots.addAll(_listLots);
               bloc.manageFood.add(new AddFoodEvent(food: food));
               showCustomSnackBar(context, food,
                   action: SnackBarOperation.create);

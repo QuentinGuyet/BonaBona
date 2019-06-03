@@ -63,22 +63,18 @@ class FoodBloc implements BlocBase {
 
   Future<Null> _getFood() async {
     _food = await DBProvider.db.getFood(_idFood);
-    _notify();
   }
 
   Future<Null> _getLots() async {
     _food.listLots = await DBProvider.db.getLots(_idFood);
-    _notify();
   }
 
   void _handleLogic(FoodEvent event) async {
     if (event is AddFoodEvent) {
       await DBProvider.db.insertFood(event.food);
-      if (event.food.listLots != null) {
-        for (Lot lot in event.food.listLots) {
-          lot.idFood = event.food.idFood;
-          await DBProvider.db.insertLot(lot);
-        }
+      for (Lot lot in event.food.listLots) {
+        lot.idFood = event.food.idFood;
+        await DBProvider.db.insertLot(lot);
       }
     } else if (event is UpdateFoodEvent) {
       await DBProvider.db.updateFood(event.food);
@@ -86,7 +82,6 @@ class FoodBloc implements BlocBase {
       updateLotFood(event.idFood, event.oldList, event.newList);
     } else if (event is SearchFoodInAPI) {
       if (_barCode.isEmpty) {
-        // _loadingStateSubject.add(LoadingState.started);
         _barCode = event.barcode;
         _loadingStateSubject.add(LoadingState.loading);
         Product p = await OpenFoodLogic.ofl.getProduct(event.barcode).then((p) {

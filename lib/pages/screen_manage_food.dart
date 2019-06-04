@@ -50,14 +50,20 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
     return StreamBuilder<Food>(
       stream: bloc.outFood,
       builder: (context, snapshot) {
-        return formAddFood(snapshot, context);
+        if (snapshot.hasData) {
+          food = snapshot.data;
+          return formAddFood(snapshot, context);
+        } else {
+          return Center(
+            child: Text("Nothing to display"),
+          );
+        }
       },
     );
   }
 
   Form formAddFood(AsyncSnapshot<Food> snapshot, BuildContext context) {
-    if (snapshot.hasData) {
-      food = snapshot.data;
+    if (food.idFood != null) {
       if (food.nameFood != null && _ctrlName.text.isEmpty)
         _ctrlName.text = food.nameFood;
       if (food.brandsName != null && _ctrlBrand.text.isEmpty)
@@ -69,11 +75,6 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
       if (food.price != null && _ctrlPrice.text == "0,00€") {
         _ctrlPrice.text = food.price.toStringAsFixed(2);
       }
-      if(food.listLots == null) {
-        food.listLots = new List<Lot>();
-      }
-    } else {
-      food = new Food(listLots: new List<Lot>());
     }
 
     return Form(
@@ -111,7 +112,7 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
   }
 
   buildSliverDelegate() {
-    if (food.listLots != null && food.listLots.isNotEmpty) {
+    if (food.listLots.isNotEmpty) {
       return SliverChildBuilderDelegate((BuildContext context, int index) {
         return listLotTile(index);
       }, childCount: food.listLots.length);
@@ -146,7 +147,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
         icon: Icon(Icons.delete),
         onPressed: () {
           if (!changed) changed = true;
-          food.listLots.removeWhere((l) => l.numLot == food.listLots[index].numLot);
+          food.listLots
+              .removeWhere((l) => l.numLot == food.listLots[index].numLot);
           setState(() {});
         },
       ),
@@ -214,7 +216,8 @@ class _ManageFoodScreenState extends State<ManageFoodScreen> {
 
   bool updateLotFood() {
     if (changed) {
-      bloc.manageFood.add(new UpdateFoodLotEvent(idFood: food.idFood, newList: food.listLots));
+      bloc.manageFood.add(
+          new UpdateFoodLotEvent(idFood: food.idFood, newList: food.listLots));
     }
     return changed;
   }

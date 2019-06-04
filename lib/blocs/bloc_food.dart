@@ -53,7 +53,8 @@ class FoodBloc implements BlocBase {
 
   FoodBloc({this.idFood, this.idMeal}) {
     _actionFoodController.stream.listen(_handleLogic);
-
+    _food = new Food(listLots: new List<Lot>());
+    _inFood.add(_food);
     if (idFood != null) {
       _idFood = idFood;
       _getFood().then((_) {
